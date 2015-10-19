@@ -147,11 +147,11 @@ gulp docs
 Once built, view `test/index.html` in the browser.
 
 ## TODO
-
-[ ] Test `chrome-storage-local` adapter
-[ ] Add Blackberry Persistent storage
-[ ] Add Google Gears storage
-[ ] Add HTML5 Filesystem storage
-[ ] Add IE Userdata storage
-[ ] Add IndexedDB storage
+- [ ] Test `chrome-storage-local` adapter
+- [ ] Add Blackberry Persistent storage
+- [ ] Add Google Gears storage
+- [ ] Add HTML5 Filesystem storage
+- [ ] Add IE Userdata storage
+- [ ] Add IndexedDB storage
+- [ ] Add CouchDB storage
 [ ] Add CouchDB storage
