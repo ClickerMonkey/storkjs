@@ -1,0 +1,1 @@
+TestBase( 'chrome-storage-local', 'csl', true );

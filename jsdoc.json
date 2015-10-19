@@ -1,0 +1,35 @@
+{
+  "source": {
+    "include": [
+      "src/lib/functions.js",
+      "src/lib/Stork.js",
+      "src/lib/Promise.js",
+      "src/lib/FastMap.js",
+      "src/lib/extending.js",
+      "src/adapters/"
+    ]
+  },
+  "templates": {
+
+    "applicationName": "Stork JS",
+    "linenums": true,
+    "cleverLinks": true,
+    "default": {
+      "outputSourceFiles": true
+    }
+  },
+  "opts": {
+    "destination": "../storkjs-docs/",
+    "recurse": "true",
+    "template": "./node_modules/jaguarjs-jsdoc",
+    "readme": "./README.md",
+    "pedantic": true,
+    "debug": true
+  },
+  "plugins": [
+    "plugins/markdown"
+  ],
+  "tags": {
+    "allowUnknownTags": true
+  }
+}

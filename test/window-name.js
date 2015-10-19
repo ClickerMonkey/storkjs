@@ -1,0 +1,1 @@
+TestBase( 'window-name', 'wn', false );

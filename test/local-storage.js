@@ -1,0 +1,1 @@
+TestBase( 'local-storage', 'ls', true );

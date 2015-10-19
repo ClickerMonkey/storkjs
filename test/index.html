@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <!-- QUnit -->
+    <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.19.0.css">
+    <script src="http://code.jquery.com/qunit/qunit-1.19.0.js"></script>
+
+    <!-- Stork -->
+    <script src="../build/stork.js"></script>
+
+    <!-- Tests -->
+    <script src="base.js"></script>
+    <script src="webkit-sqlite.js"></script>
+    <script src="memory.js"></script>
+    <script src="window-name.js"></script>
+    <script src="local-storage.js"></script>
+    <script src="chrome-storage-local.js"></script>
+
+  </head>
+  <body>
+
+    <h1 id="qunit-header">Storkjs</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+    <div id="qunit-fixture">
+        <div id="container"></div>
+    </div>
+
+  </body>
+</html>

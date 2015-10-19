@@ -1,0 +1,18 @@
+{
+  "app": {
+    "background": {
+    }
+  },
+  "manifest_version": 2,
+  "name": "StorkJS",
+  "version": "1.0",
+
+  "default_locale": "en",
+  "description": "A manifest to enable chrome.storage.local",
+
+  "author": "Philip Diffenderfer",
+  
+  "permissions": [
+    "storage"
+  ],
+}
