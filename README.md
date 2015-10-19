@@ -1,7 +1,9 @@
 # StorkJS
 ### Simple key-value storage in your browser. 
 
-[View Documentation](http://clickermonkey.github.io/storkjs)
+[View Documentation](http://clickermonkey.github.io/storkjs) /
+[Download stork.js](https://raw.githubusercontent.com/ClickerMonkey/storkjs/master/build/stork.js) /
+[Download stork.min.js](https://raw.githubusercontent.com/ClickerMonkey/storkjs/master/build/stork.min.js)
 
 StorkJS allows you to store key-value pairs & records in the browser, so when your user returns that data is still there.
 Inspired by [lawnchair](http://brian.io/lawnchair/), StorkJS is a more robust option with error handling, key customization, and much more!
