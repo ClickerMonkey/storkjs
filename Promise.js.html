@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Source: Promise.js</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/jaguar.css">
+    
+    
+    <script>
+    var config = {"monospaceLinks":false,"cleverLinks":true,"applicationName":"Stork JS","linenums":true,"default":{"outputSourceFiles":true}};
+    </script>
+    
+
+    
+</head>
+<body>
+<div id="wrap" class="clearfix">
+    
+<div class="navigation">
+    <h3 class="applicationName"><a href="index.html">Stork JS</a></h3>
+
+    <div class="search">
+        <input id="search" type="text" class="form-control input-sm" placeholder="Search Documentations">
+    </div>
+    <ul class="list">
+    
+        <li class="item" data-name="Stork">
+            <span class="title">
+                <a href="Stork.html">Stork</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="Stork.adapters"><a href="Stork.html#.adapters">adapters</a></li>
+            
+                <li data-name="Stork.plugins"><a href="Stork.html#.plugins">plugins</a></li>
+            
+                <li data-name="Stork#adapter"><a href="Stork.html#adapter">adapter</a></li>
+            
+                <li data-name="Stork#cache"><a href="Stork.html#cache">cache</a></li>
+            
+                <li data-name="Stork#initialized"><a href="Stork.html#initialized">initialized</a></li>
+            
+                <li data-name="Stork#key"><a href="Stork.html#key">key</a></li>
+            
+                <li data-name="Stork#lazy"><a href="Stork.html#lazy">lazy</a></li>
+            
+                <li data-name="Stork#loaded"><a href="Stork.html#loaded">loaded</a></li>
+            
+                <li data-name="Stork#name"><a href="Stork.html#name">name</a></li>
+            
+                <li data-name="Stork#options"><a href="Stork.html#options">options</a></li>
+            
+                <li data-name="Stork#pending"><a href="Stork.html#pending">pending</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="Stork~allFailure"><a href="Stork.html#~allFailure">allFailure</a></li>
+            
+                <li data-name="Stork~allSuccess"><a href="Stork.html#~allSuccess">allSuccess</a></li>
+            
+                <li data-name="Stork~batchFailure"><a href="Stork.html#~batchFailure">batchFailure</a></li>
+            
+                <li data-name="Stork~batchSuccess"><a href="Stork.html#~batchSuccess">batchSuccess</a></li>
+            
+                <li data-name="Stork~destroyFailure"><a href="Stork.html#~destroyFailure">destroyFailure</a></li>
+            
+                <li data-name="Stork~destroySuccess"><a href="Stork.html#~destroySuccess">destroySuccess</a></li>
+            
+                <li data-name="Stork~eachFailure"><a href="Stork.html#~eachFailure">eachFailure</a></li>
+            
+                <li data-name="Stork~eachSuccess"><a href="Stork.html#~eachSuccess">eachSuccess</a></li>
+            
+                <li data-name="Stork~getFailure"><a href="Stork.html#~getFailure">getFailure</a></li>
+            
+                <li data-name="Stork~getManyFailure"><a href="Stork.html#~getManyFailure">getManyFailure</a></li>
+            
+                <li data-name="Stork~getManySuccess"><a href="Stork.html#~getManySuccess">getManySuccess</a></li>
+            
+                <li data-name="Stork~getSuccess"><a href="Stork.html#~getSuccess">getSuccess</a></li>
+            
+                <li data-name="Stork~initFailure"><a href="Stork.html#~initFailure">initFailure</a></li>
+            
+                <li data-name="Stork~initSuccess"><a href="Stork.html#~initSuccess">initSuccess</a></li>
+            
+                <li data-name="Stork~plugin"><a href="Stork.html#~plugin">plugin</a></li>
+            
+                <li data-name="Stork~putFailure"><a href="Stork.html#~putFailure">putFailure</a></li>
+            
+                <li data-name="Stork~putSuccess"><a href="Stork.html#~putSuccess">putSuccess</a></li>
+            
+                <li data-name="Stork~reloadFailure"><a href="Stork.html#~reloadFailure">reloadFailure</a></li>
+            
+                <li data-name="Stork~reloadSuccess"><a href="Stork.html#~reloadSuccess">reloadSuccess</a></li>
+            
+                <li data-name="Stork~removeFailure"><a href="Stork.html#~removeFailure">removeFailure</a></li>
+            
+                <li data-name="Stork~removeManyFailure"><a href="Stork.html#~removeManyFailure">removeManyFailure</a></li>
+            
+                <li data-name="Stork~removeManySuccess"><a href="Stork.html#~removeManySuccess">removeManySuccess</a></li>
+            
+                <li data-name="Stork~removeSuccess"><a href="Stork.html#~removeSuccess">removeSuccess</a></li>
+            
+                <li data-name="Stork~saveFailure"><a href="Stork.html#~saveFailure">saveFailure</a></li>
+            
+                <li data-name="Stork~saveSuccess"><a href="Stork.html#~saveSuccess">saveSuccess</a></li>
+            
+                <li data-name="Stork~sizeFailure"><a href="Stork.html#~sizeFailure">sizeFailure</a></li>
+            
+                <li data-name="Stork~sizeSuccess"><a href="Stork.html#~sizeSuccess">sizeSuccess</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Stork.adapter"><a href="Stork.html#.adapter">adapter</a></li>
+            
+                <li data-name="Stork.plugin"><a href="Stork.html#.plugin">plugin</a></li>
+            
+                <li data-name="Stork#all"><a href="Stork.html#all">all</a></li>
+            
+                <li data-name="Stork#batch"><a href="Stork.html#batch">batch</a></li>
+            
+                <li data-name="Stork#destroy"><a href="Stork.html#destroy">destroy</a></li>
+            
+                <li data-name="Stork#each"><a href="Stork.html#each">each</a></li>
+            
+                <li data-name="Stork#get"><a href="Stork.html#get">get</a></li>
+            
+                <li data-name="Stork#getMany"><a href="Stork.html#getMany">getMany</a></li>
+            
+                <li data-name="Stork#init"><a href="Stork.html#init">init</a></li>
+            
+                <li data-name="Stork#put"><a href="Stork.html#put">put</a></li>
+            
+                <li data-name="Stork#reload"><a href="Stork.html#reload">reload</a></li>
+            
+                <li data-name="Stork#remove"><a href="Stork.html#remove">remove</a></li>
+            
+                <li data-name="Stork#removeMany"><a href="Stork.html#removeMany">removeMany</a></li>
+            
+                <li data-name="Stork#save"><a href="Stork.html#save">save</a></li>
+            
+                <li data-name="Stork#size"><a href="Stork.html#size">size</a></li>
+            
+                <li data-name="Stork#then"><a href="Stork.html#then">then</a></li>
+            
+                <li data-name="Stork#valid"><a href="Stork.html#valid">valid</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Stork.FastMap">
+            <span class="title">
+                <a href="Stork.FastMap.html">Stork.FastMap</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Stork.FastMap#get"><a href="Stork.FastMap.html#get">get</a></li>
+            
+                <li data-name="Stork.FastMap#has"><a href="Stork.FastMap.html#has">has</a></li>
+            
+                <li data-name="Stork.FastMap#hasOverlap"><a href="Stork.FastMap.html#hasOverlap">hasOverlap</a></li>
+            
+                <li data-name="Stork.FastMap#indexOf"><a href="Stork.FastMap.html#indexOf">indexOf</a></li>
+            
+                <li data-name="Stork.FastMap#put"><a href="Stork.FastMap.html#put">put</a></li>
+            
+                <li data-name="Stork.FastMap#putMap"><a href="Stork.FastMap.html#putMap">putMap</a></li>
+            
+                <li data-name="Stork.FastMap#remove"><a href="Stork.FastMap.html#remove">remove</a></li>
+            
+                <li data-name="Stork.FastMap#removeAt"><a href="Stork.FastMap.html#removeAt">removeAt</a></li>
+            
+                <li data-name="Stork.FastMap#reset"><a href="Stork.FastMap.html#reset">reset</a></li>
+            
+                <li data-name="Stork.FastMap#size"><a href="Stork.FastMap.html#size">size</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Stork.Promise">
+            <span class="title">
+                <a href="Stork.Promise.html">Stork.Promise</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="Stork.Promise.CHAINED"><a href="Stork.Promise.html#.CHAINED">CHAINED</a></li>
+            
+                <li data-name="Stork.Promise.FAILURE"><a href="Stork.Promise.html#.FAILURE">FAILURE</a></li>
+            
+                <li data-name="Stork.Promise.PENDING"><a href="Stork.Promise.html#.PENDING">PENDING</a></li>
+            
+                <li data-name="Stork.Promise.SUCCESS"><a href="Stork.Promise.html#.SUCCESS">SUCCESS</a></li>
+            
+                <li data-name="Stork.Promise#args"><a href="Stork.Promise.html#args">args</a></li>
+            
+                <li data-name="Stork.Promise#context"><a href="Stork.Promise.html#context">context</a></li>
+            
+                <li data-name="Stork.Promise#errors"><a href="Stork.Promise.html#errors">errors</a></li>
+            
+                <li data-name="Stork.Promise#failures"><a href="Stork.Promise.html#failures">failures</a></li>
+            
+                <li data-name="Stork.Promise#next"><a href="Stork.Promise.html#next">next</a></li>
+            
+                <li data-name="Stork.Promise#root"><a href="Stork.Promise.html#root">root</a></li>
+            
+                <li data-name="Stork.Promise#state"><a href="Stork.Promise.html#state">state</a></li>
+            
+                <li data-name="Stork.Promise#successes"><a href="Stork.Promise.html#successes">successes</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Stork.Promise#error"><a href="Stork.Promise.html#error">error</a></li>
+            
+                <li data-name="Stork.Promise#then"><a href="Stork.Promise.html#then">then</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+    </ul>
+</div>
+    <div class="main">
+        <h1 class="page-title" data-filename="Promise.js.html">Source: Promise.js</h1>
+        
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
+/**
+ * Instantiates a new Promise. 
+ *
+ * @constructor
+ * @memberOf Stork
+ * @param {Object} context
+ *        The `this` to apply to the success, failure, and error callbacks.
+ * @param {function} [success]
+ *        A success callback to add to be invoked.
+ * @param {function} [failure]
+ *        A failure callback to add to be invoked.
+ * @param {Stork.Promise} [root]
+ *        The root promise, if one exists.
+ */
+function Promise(context, success, failure, root)
+{
+  /**
+   * The `this` to apply to the callbacks.
+   * 
+   * @type {Object}
+   */
+  this.context = context;
+
+  /**
+   * The root promise in the chain of promises.
+   * 
+   * @type {Promise}
+   */
+  this.root = root || this;
+
+  /**
+   * The next promise in the chain of promises.
+   * 
+   * @type {Promise}
+   */
+  this.next = null;
+
+  /**
+   * The first valid promise returned from a success callback.
+   * @private
+   * 
+   * @type {Promise}
+   */
+  this.nextFromSuccess = null;
+
+  /**
+   * The current state of this promise.
+   * 
+   * @type {Number}
+   * @default Promise.PENDING
+   */
+  this.state = Promise.PENDING;
+
+  /**
+   * An array of success callbacks to invoke when the promise is marked as
+   * successful.
+   * 
+   * @type {function[]}
+   */
+  this.successes = [];
+
+  /**
+   * An array of failure callbacks to invoke when the promise is marked as
+   * failed.
+   * 
+   * @type {function[]}
+   */
+  this.failures = [];
+
+  /**
+   * An array of error callbacks stored at the root promise.
+   * 
+   * @type {function[]}
+   */
+  this.errors = [];
+
+  /**
+   * An array of arguments that are to be passed to the success or failure 
+   * callbacks.
+   * 
+   * @type {Array}
+   */
+  this.args = null;
+
+  // Queue the passed in success &amp; failure callbacks.
+  this.$queue( success, failure );
+}
+
+/**
+ * Promise is awaiting for a success or failure notification.
+ * @type {Number}
+ */
+Promise.PENDING = 0;
+
+/**
+ * Promise has been marked as a failure.
+ * @type {Number}
+ */
+Promise.FAILURE = 1;
+
+/**
+ * Promise has been marked as a success.
+ * @type {Number}
+ */
+Promise.SUCCESS = 2;
+
+/**
+ * Promise has been marked as a success and the next promise has been notified.
+ * @type {Number}
+ */
+Promise.CHAINED = 3;
+
+Promise.prototype = 
+{
+  /**
+   * Adds success and optionally a failure callback to be invoked when the 
+   * promised operation completes. The success callback can return a promise 
+   * to chain promises.
+   * 
+   * @param  {function} success
+   *         The function to invoke with the success arguments.
+   * @param  {function} [failure]
+   *         The function to invoke with the failure arguments.
+   * @return {Stork.Promise}
+   *         The next promise to invoke when the returned promise from the 
+   *         success callback finishes.
+   */
+  then: function(success, failure)
+  {
+    this.$queue( success, failure );  
+
+    if ( !this.next )
+    {
+      this.next = new Promise( this.context, undefined, undefined, this );
+    }
+   
+    if ( this.state &amp; Promise.SUCCESS ) 
+    {
+      this.$handleSuccesses();
+    } 
+    else if ( this.state === Promise.FAILURE ) 
+    {
+      this.$handleFailures();
+    }
+
+    return this.next;
+  },
+
+  /**
+   * Adds a generic error to be called if any of the promises in the chain have
+   * failed.
+   * 
+   * @param  {function} error
+   *         A function to invoke if any of the promises fail.
+   * @return {Stork.Promise}
+   *         A reference to this promise.
+   */
+  error: function(error)
+  {
+    if ( isFunc( error ) )
+    {
+      this.root.errors.push( error );
+
+      if ( this.state === Promise.FAILURE )
+      {
+        this.$handleFailures();
+      }  
+    }
+
+    return this;
+  },
+
+  // When the given promise finishes it will finish this promise as well.
+  $bindTo: function(to, replacementArguments)
+  {
+    var from = this;
+
+    to.then(
+      function() {
+        from.context = to.context;
+        from.$success( coalesce( replacementArguments, to.args ) );
+      },
+      function() {
+        from.context = to.context;
+        from.$failure( coalesce( replacementArguments, to.args ) );
+      })
+    ;
+  },
+
+  // Returns true if the promise has yet to finish.
+  $pending: function()
+  {
+    return this.state === Promise.PENDING;
+  },
+
+  // Adds a success and/or failure callback to this promise.
+  $queue: function(success, failure)
+  {
+    if ( isFunc( success ) ) this.successes.push( success );
+    if ( isFunc( failure ) ) this.failures.push( failure );
+  },
+
+  // Executes all successes currently on the promise.
+  $handleSuccesses: function()
+  {
+    var succs = this.successes;
+    for (var i = 0; i &lt; succs.length; i++) 
+    {
+      var s = succs[ i ];
+      var result = s.apply( this.context, this.args );
+
+      if ( result instanceof Promise &amp;&amp; !this.nextFromSuccess ) 
+      {
+        this.nextFromSuccess = result;
+      }
+    }
+
+    succs.length = 0;
+
+    this.$handleNext();
+  },
+
+  // If a next promise is given and one of the success callbacks return a 
+  // promise, this promise is bound to the returned promise to complete the 
+  // link in the chain.
+  $handleNext: function()
+  {
+    var next = this.next;
+    var returned = this.nextFromSuccess;
+
+    if (next &amp;&amp; returned &amp;&amp; this.state === Promise.SUCCESS)
+    {
+      next.$bindTo( returned );
+      this.state = Promise.CHAINED;
+    }
+  },
+
+  // Marks this promise as a success if the promise hasn't finished yet.
+  $success: function(args)
+  {
+    if ( this.state === Promise.PENDING ) 
+    {
+      this.args = args || [];
+      this.state = Promise.SUCCESS;
+      this.$handleSuccesses();
+    }
+  },
+
+  // Executes all failures currently on the promise.
+  $handleFailures: function()
+  {
+    var fails = this.failures;
+    for (var i = 0; i &lt; fails.length; i++) 
+    {
+      fails[ i ].apply( this.context, this.args );
+    }
+    fails.length = 0;
+
+    var errors = this.root.errors;
+    var errorArgument = [ this.args[ this.args.length - 1 ] ];
+    for (var i = 0; i &lt; errors.length; i++)
+    {
+      errors[ i ].apply( this.context, errorArgument );
+    }
+    errors.length = 0;
+  },
+
+  // Marks this promise as a failure if the promise hasn't finished yet.
+  $failure: function(args)
+  {
+    if ( this.state === Promise.PENDING ) 
+    {
+      this.args = args || [];
+      this.state = Promise.FAILURE;
+      this.$handleFailures();
+    }
+  }
+
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+
+
+        
+
+        <footer>
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Mon Oct 19 2015 18:19:44 GMT-0400 (EDT)
+        </footer>
+    </div>
+</div>
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+<script src="scripts/main.js"></script>
+</body>
+</html>
