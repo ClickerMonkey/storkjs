@@ -147,7 +147,8 @@ gulp docs
 Once built, view `test/index.html` in the browser.
 
 ## TODO
-[ ] Test `chrome-storage-local` adapter.
+
+[ ] Test `chrome-storage-local` adapter
 [ ] Add Blackberry Persistent storage
 [ ] Add Google Gears storage
 [ ] Add HTML5 Filesystem storage
