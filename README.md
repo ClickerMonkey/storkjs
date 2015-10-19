@@ -1,5 +1,7 @@
 # StorkJS
-### Simple key-value storage in your browser.
+### Simple key-value storage in your browser. 
+
+[View Documentation](http://clickermonkey.github.io/storkjs)
 
 StorkJS allows you to store key-value pairs & records in the browser, so when your user returns that data is still there.
 Inspired by [lawnchair](http://brian.io/lawnchair/), StorkJS is a more robust option with error handling, key customization, and much more!
@@ -18,19 +20,19 @@ StorkJS uses the most preferred & supported storage available based on your brow
 - Everything is cached to avoid unnessary retrievals
 
 #### API
-- {@link Stork#then|then(callback)}: Start a chain of asynchronous calls
-- {@link Stork#get|get(key, [success], [failure])}: Return a single value if it exists
-- {@link Stork#getMany|getMany(keys, [success], [failure])}: Return several values at once
-- {@link Stork#save|save(record, [success], [failure])}: Save a record, generating a key if one doesn't exist
-- {@link Stork#batch|batch(records, [success], [failure])}: Save multuple records at once
-- {@link Stork#put|put(key, value, [success], [failure])}: Save a key-value pair
-- {@link Stork#remove|remove(key, [success], [failure])}: Removes a value/record based on their key
-- {@link Stork#removeMany|removeMany(keys, [success], [failure])}: Removes several values/records at once
-- {@link Stork#destroy|destroy([success], [failure])}: Remove all key-values/records
-- {@link Stork#reload|reload([success], [failure])}: Load all records into cache
-- {@link Stork#each|each(callback, [failure])}: Invokes the callback for all key-value pairs
-- {@link Stork#all|all([success], [failure])}: Returns all keys and values to the callback
-- {@link Stork#size|size([success], [failure])}: Returns the number of key-value pairs to the callback
+- [`then(callback)`](http://clickermonkey.github.io/storkjs/Stork#then): Start a chain of asynchronous calls
+- [`get(key, [success], [failure])`](http://clickermonkey.github.io/storkjs/Stork#get): Return a single value if it exists
+- [`getMany(keys, [success], [failure])`](http://clickermonkey.github.io/storkjs/Stork#getMany): Return several values at once
+- [`save(record, [success], [failure])`](http://clickermonkey.github.io/storkjs/Stork#save): Save a record, generating a key if one doesn't exist
+- [`batch(records, [success], [failure])`](http://clickermonkey.github.io/storkjs/Stork#batch): Save multuple records at once
+- [`put(key, value, [success], [failure])`](http://clickermonkey.github.io/storkjs/Stork#put): Save a key-value pair
+- [`remove(key, [success], [failure])`](http://clickermonkey.github.io/storkjs/Stork#remove): Removes a value/record based on their key
+- [`removeMany(keys, [success], [failure])`](http://clickermonkey.github.io/storkjs/Stork#removeMany): Removes several values/records at once
+- [`destroy([success], [failure])`](http://clickermonkey.github.io/storkjs/Stork#destroy): Remove all key-values/records
+- [`reload([success], [failure])`](http://clickermonkey.github.io/storkjs/Stork#reload): Load all records into cache
+- [`each(callback, [failure])`](http://clickermonkey.github.io/storkjs/Stork#each): Invokes the callback for all key-value pairs
+- [`all([success], [failure])`](http://clickermonkey.github.io/storkjs/Stork#all): Returns all keys and values to the callback
+- [`size([success], [failure])`](http://clickermonkey.github.io/storkjs/Stork#size): Returns the number of key-value pairs to the callback
 
 #### Examples
 *Using StorkJS as a record store*
@@ -143,3 +145,12 @@ gulp docs
 
 #### Testing
 Once built, view `test/index.html` in the browser.
+
+## TODO
+[ ] Test `chrome-storage-local` adapter.
+[ ] Add Blackberry Persistent storage
+[ ] Add Google Gears storage
+[ ] Add HTML5 Filesystem storage
+[ ] Add IE Userdata storage
+[ ] Add IndexedDB storage
+[ ] Add CouchDB storage
