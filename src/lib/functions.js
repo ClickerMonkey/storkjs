@@ -118,21 +118,21 @@ function $promise(methodName, func)
 
 function getAdapter(adapterName)
 {
-  if ( !getAdapter.chosen ) 
+  if ( adapterName )
   {
-    if ( adapterName )
+    for (var i = 0; i < Stork.adapters.length; i++) 
     {
-      for (var i = 0; i < Stork.adapters.length; i++) 
-      {
-        var adapt = Stork.adapters[i];
+      var adapt = Stork.adapters[i];
 
-        if ( adapt.name === adapterName && adapt.definition.valid() )
-        {
-          return adapt;
-        }
+      if ( adapt.name === adapterName && adapt.definition.valid() )
+      {
+        return adapt;
       }
     }
+  }
 
+  if ( !getAdapter.chosen ) 
+  {
     Stork.adapters.sort( compareAdapters );
 
     for (var i = 0; i < Stork.adapters.length; i++) 

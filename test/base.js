@@ -25,8 +25,9 @@ function TestBase(adapter, prepend, hasBackend)
 
   function fail(done) 
   {
-    return function() 
+    return function(e) 
     {
+      console.log( e );
       ok( false, 'fail' );
       done();
     };
@@ -59,12 +60,6 @@ function TestBase(adapter, prepend, hasBackend)
         equal( db.key, 'id', 'correct key' );
         equal( db.name, prepend + 'test0', 'correct name' );
         equal( db.initialized, true, 'mark as initialized' );
-
-        if ( window.console )
-        {
-          console.log( adapter, 'desired and', db.adapter.name, 'was chosen' );
-        }
-
         done();
       })
       .error( fail( done ) )

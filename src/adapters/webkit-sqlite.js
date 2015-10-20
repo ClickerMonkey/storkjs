@@ -1,5 +1,5 @@
 
-Stork.adapter('webkit-sqlite', 5, function()
+Stork.adapter('webkit-sqlite', 6, function()
 {
   var DATABASE_NAME = 'stork';
 

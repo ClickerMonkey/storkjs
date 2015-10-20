@@ -161,10 +161,9 @@ Once built, view `test/index.html` in the browser.
 
 ## TODO
 - [ ] Test `chrome-storage-local` adapter
+- [ ] Test `ie-userdata` adapter
 - [ ] Add Blackberry Persistent storage
-- [ ] Add Google Gears storage
 - [ ] Add HTML5 Filesystem storage
-- [ ] Add IE Userdata storage
-- [ ] Add IndexedDB storage
-- [ ] Add CouchDB storage
+- [X] Add IE Userdata storage
+- [X] Add IndexedDB storage
 - [ ] Add CouchDB storage

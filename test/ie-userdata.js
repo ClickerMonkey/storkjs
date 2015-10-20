@@ -1,0 +1,1 @@
+TestBase( 'ie-userdata', 'iu', false );

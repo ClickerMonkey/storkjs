@@ -125,21 +125,21 @@ function $promise(methodName, func)
 
 function getAdapter(adapterName)
 {
-  if ( !getAdapter.chosen ) 
+  if ( adapterName )
   {
-    if ( adapterName )
+    for (var i = 0; i < Stork.adapters.length; i++) 
     {
-      for (var i = 0; i < Stork.adapters.length; i++) 
-      {
-        var adapt = Stork.adapters[i];
+      var adapt = Stork.adapters[i];
 
-        if ( adapt.name === adapterName && adapt.definition.valid() )
-        {
-          return adapt;
-        }
+      if ( adapt.name === adapterName && adapt.definition.valid() )
+      {
+        return adapt;
       }
     }
+  }
 
+  if ( !getAdapter.chosen ) 
+  {
     Stork.adapters.sort( compareAdapters );
 
     for (var i = 0; i < Stork.adapters.length; i++) 
@@ -2955,6 +2955,361 @@ Stork.adapter('chrome-storage-local', 4, function()
   }
 });
 
+Stork.adapter('ie-userdata', 1.5, 
+{
+  valid: function() 
+  {
+    return def( document.body.addBehavior );
+  },
+
+  init: function(options, success, failure) 
+  {
+    var promise = new Promise( this, success, failure );
+
+    var s = document.createElement('span');
+    s.style.behavior = "url('#default#userData')";
+    s.style.position = 'absolute';
+    s.style.left = 10000;
+    document.body.appendChild(s);
+
+    this.store = s;
+    this.store.load( this.name );
+
+    if ( this.lazy )
+    {
+      this.finishInitialization( promise, [this] );
+    }
+    else
+    {
+      promise.$bindTo( this.reload(), [this] );
+    }
+    
+    return promise;
+  },
+
+  reload: function(success, failure)
+  {
+    var promise = new Promise( this, success, failure );
+
+    var attributes = this.store.XMLDocument.firstChild.attributes;
+    var cache = new FastMap();
+
+    for (var i = 0; i < attributes.length; i++) 
+    {
+      try
+      {
+        var v = attributes[ i ];
+        var rawKey = v.nodeName;
+        var rawValue = v.nodeValue;
+        var key = this.decode( rawKey );
+        var value = fromJson( rawValue );
+
+        cache.put( rawKey, value, key ); 
+      }
+      catch (e)
+      {
+        // ignore
+      }
+    }
+
+    this.cache = cache;
+    this.loaded = true;
+    this.finishReload( promise );
+
+    return promise;
+  },
+
+  _get: function(key, rawKey, promise)
+  {
+    var rawValue = this.store.getAttribute( rawKey );
+
+    if ( rawValue === null )
+    {
+      promise.$success( [undefined, key] );
+    }
+    else
+    {
+      var value = null;
+
+      try
+      {
+        value = fromJson( rawValue );
+      }
+      catch (e)
+      {
+        promise.$failure( [e] );
+      }
+
+      if ( promise.$pending() )
+      {
+        this.cache.put( rawKey, value, key );
+
+        promise.$success( [value, key] );
+      }
+    }
+  },
+
+  _destroy: function(promise)
+  {
+    var attributes = this.store.XMLDocument.firstChild.attributes;
+
+    for (var i = 0; i < attributes.length; i++) 
+    {
+      this.store.removeAttribute( attributes[ i ].nodeName );
+    }
+
+    this.cache.reset();
+
+    promise.$success();
+  },
+
+  _put: function(key, value, rawKey, rawValue, promise)
+  {
+    var previousValue = this.cache.get( rawKey );
+
+    try
+    {
+      this.store.setAttribute( rawKey, rawValue );
+    }
+    catch (e)
+    {
+      promise.$failure( [key, value, e] );
+    }
+
+    if ( promise.$pending() )
+    {
+      this.cache.put( rawKey, value, key );
+
+      promise.$success( [key, value, previousValue] );
+    }
+  },
+
+  _remove: function(key, rawKey, value, promise)
+  {
+    this.store.removeAttribute( rawKey );
+    this.cache.remove( rawKey );
+
+    promise.$success( [value, key] );
+  }
+
+});
+Stork.adapter('indexed-db', 5, function()
+{
+
+  var getIDB = function() 
+  {
+    return window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.oIndexedDB || window.msIndexedDB;
+  };
+
+  var getIDBTransaction = function() 
+  {
+    return window.IDBTransaction || window.webkitIDBTransaction || window.mozIDBTransaction || window.oIDBTransaction || window.msIDBTransaction;
+  };
+
+  var getIDBKeyRange = function() 
+  {
+    return window.IDBKeyRange || window.webkitIDBKeyRange || window.mozIDBKeyRange || window.oIDBKeyRange || window.msIDBKeyRange;
+  };
+
+  var DATABASE_NAME = 'stork';
+  var DATABASE_VERSION = 3;
+  var READ_WRITE = (getIDBTransaction() && 'READ_WRITE' in getIDBTransaction()) ? getIDBTransaction().READ_WRITE : 'readwrite';
+
+  return {
+
+    valid: function() 
+    {
+      return !!getIDB();
+    },
+
+    init: function(options, success, failure)
+    {
+      var promise = new Promise( this, success, failure );
+
+      var stork = this;
+      var factory = getIDB();
+      var request = factory.open( this.name, DATABASE_VERSION );
+
+      request.onerror = function(e)
+      {
+        promise.$failure( [e] );
+      };
+
+      // First started or it needs a version upgrade
+      request.onupgradeneeded = function()
+      {
+        stork.db = request.result;
+        stork.db.createObjectStore( stork.name, { keyPath: this.key } );
+      };
+
+      // Database is ready for use
+      request.onsuccess = function(event)
+      {
+        stork.db = request.result;
+
+        if ( stork.lazy )
+        {
+          stork.finishInitialization( promise, [stork] );
+        }
+        else
+        {
+          promise.$bindTo( stork.reload(), [stork] );
+        }
+      };
+
+      return promise;
+    },
+
+    reload: function(success, failure)
+    {
+      var promise = new Promise( this, success, failure );
+
+      var stork = this;
+      var objectStore = this.db.transaction( this.name ).objectStore( this.name );
+      var cursor = objectStore.openCursor();
+      var cache = new FastMap();
+
+      cursor.onsuccess = function(e)
+      {
+        var result = cursor.result;
+
+        if (result)
+        {
+          var rawKey = result.key;
+          var value = result.value;
+          var key = stork.decode( rawKey );
+
+          cache.put( rawKey, value, key );
+
+          result['continue']();
+        }
+        else
+        {
+          stork.cache = cache;
+          stork.loaded = true;
+          stork.finishReload( promise, [cache.values, cache.okeys] );
+        }
+      };
+
+      cursor.onerror = function(e)
+      {
+        promise.$failure( [keys, e] );
+      };
+
+      return promise;
+    },
+
+    _destroy: function(promise)
+    {
+      var stork = this;
+      var objectStore = this.db.transaction( this.name, READ_WRITE ).objectStore( this.name );
+
+      objectStore.transaction.oncomplete = function()
+      {
+        stork.cache.reset();
+
+        promise.$success();
+      };
+
+      objectStore.transaction.onabort = function(e)
+      {
+        promise.$failure( [e] );
+      };
+
+      objectStore.clear();
+    },
+
+    _get: function(key, rawKey, promise)
+    {
+      var stork = this;
+      var objectStore = this.db.transaction( this.name ).objectStore( this.name );
+      var request = objectStore.get( rawKey );
+
+      request.onsuccess = function(e)
+      {
+        if ( request.result === undefined )
+        {
+          promise.$success( [undefined, key] );
+        }
+        else
+        {
+          var value = request.result;
+
+          stork.cache.put( rawKey, value );
+
+          promise.$success( [value, key] );          
+        }
+      };
+
+      request.onerror = function()
+      {
+        promise.$failure( [key, request.error] );
+      };
+    },
+
+    _put: function(key, value, rawKey, rawValue, promise)
+    {
+      var stork = this;
+      var objectStore = this.db.transaction( this.name, READ_WRITE ).objectStore( this.name );
+
+      objectStore.transaction.oncomplete = function()
+      {
+        var previousValue = stork.cache.get( rawKey );
+
+        stork.cache.put( rawKey, value );
+
+        promise.$success( [key, value, previousValue] );
+      }; 
+
+      objectStore.transaction.onabort = function(e)
+      {
+        promise.$failure( [key, value, e] );
+      };
+
+      objectStore.put( value, rawKey );
+    },
+
+    _remove: function(key, rawKey, value, promise)
+    {  
+      var stork = this;
+      var objectStore = this.db.transaction( this.name, READ_WRITE ).objectStore( this.name );
+
+      objectStore.transaction.oncomplete = function()
+      {
+        stork.cache.remove( rawKey );
+
+        promise.$success( [value, key] );
+      }; 
+
+      objectStore.transaction.onabort = function(e)
+      {
+        promise.$failure( [key, e] );
+      };
+
+      objectStore['delete']( rawKey );
+    },
+
+    _size: function(promise)
+    {
+      var stork = this;
+      var objectStore = this.db.transaction( this.name, READ_WRITE ).objectStore( this.name );
+      var request = objectStore.count();
+
+      request.onsuccess = function()
+      {
+        promise.$success( [request.result] );
+      };
+
+      request.onerror = function(e)
+      {
+        promise.$failure( [request.error] );
+      };
+    }
+
+  };
+
+});
+
 Stork.adapter('local-storage', 3, function()
 {
   var store = window.localStorage;
@@ -3233,7 +3588,7 @@ Stork.adapter('memory', 1,
 
 });
 
-Stork.adapter('webkit-sqlite', 5, function()
+Stork.adapter('webkit-sqlite', 6, function()
 {
   var DATABASE_NAME = 'stork';
 

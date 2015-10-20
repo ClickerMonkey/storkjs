@@ -1,0 +1,1 @@
+TestBase( 'indexed-db', 'id', true );
