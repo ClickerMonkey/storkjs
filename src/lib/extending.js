@@ -27,7 +27,8 @@ Stork.plugins = [];
  * 
  * @param  {Stork~plugin} definition 
  *         The function invoked on every Stork instance.
- * @return {Stork} The Stork namespace.
+ * @return {Stork} -
+ *         The Stork namespace.
  */
 Stork.plugin = function(definition)
 {
@@ -80,7 +81,8 @@ Stork.adapters = [];
  *         The definition of the adapter which is either an object of methods 
  *         to overwrite for the Stork instance, or a function which returns a 
  *         similar object.
- * @return {Stork} The Stork namespace.
+ * @return {Stork} - 
+ *         The Stork namespace.
  */
 Stork.adapter = function(name, priority, definition)
 {

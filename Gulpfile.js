@@ -14,8 +14,8 @@ var core =
   './src/lib/Promise.js',
   './src/lib/FastMap.js',
   './src/lib/extending.js',
-  './src/adapters/*.js',
   './src/plugins/*.js',
+  './src/adapters/*.js',
   './src/footer.js'
 ];
 

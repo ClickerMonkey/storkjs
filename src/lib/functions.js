@@ -17,6 +17,16 @@ function isNumber(x)
   return typeof x === 'number' && !isNaN(x);
 }
 
+function isArray(x)
+{
+  return x instanceof Array;
+}
+
+function isString(x)
+{
+  return typeof x === 'string';
+}
+
 function undef(x)
 {
   return typeof x === 'undefined';
@@ -33,6 +43,13 @@ function coalesce(a, b, c, d)
   if (def(b)) return b;
   if (def(c)) return c;
   return d;
+}
+
+function swap(arr, i, j)
+{
+  var temp = arr[i]; 
+  arr[i] = arr[j]; 
+  arr[j] = temp;
 }
 
 function noop()
@@ -55,6 +72,8 @@ function copy(from, to)
   {
     to[ prop ] = from[ prop ];
   }
+
+  return to;
 }
 
 function S4() 
@@ -72,6 +91,29 @@ function compareAdapters(a, b)
   var d = b.priority - a.priority;
 
   return d === 0 ? 0 : (d < 0 ? -1 : 1);
+}
+
+function $promise(methodName, func)
+{
+  return function()
+  {
+    var promise = new Promise( this, success, failure );
+
+    if ( this.handlePending( this[ methodName ], arguments, promise ) ) 
+    {
+      return promise;
+    }
+
+    var args = Array.prototype.slice.call( arguments );
+    args.pop(); // remove failure
+    args.pop(); // remove success
+    args.push( promise ); // add promise
+
+    // Call the wrapped function
+    func.apply( this, args );
+
+    return promise;
+  };
 }
 
 function getAdapter(adapterName)

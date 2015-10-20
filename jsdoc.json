@@ -3,6 +3,7 @@
     "include": [
       "src/lib/functions.js",
       "src/lib/Stork.js",
+      "src/plugins/",
       "src/lib/Promise.js",
       "src/lib/FastMap.js",
       "src/lib/extending.js",

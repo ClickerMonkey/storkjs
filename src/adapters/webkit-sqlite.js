@@ -6,6 +6,7 @@ Stork.adapter('webkit-sqlite', 5, function()
   var SQL_CREATE = 'CREATE TABLE IF NOT EXISTS {0} (id TEXT PRIMARY KEY, value TEXT)';
   var SQL_SELECT  = 'SELECT value FROM {0} WHERE id = ?';
   var SQL_SELECT_ALL = 'SELECT id, value FROM {0}';
+  var SQL_SELECT_MANY = 'SELECT id, value FROM {0} WHERE id IN ({1})';
   var SQL_INSERT = 'INSERT OR REPLACE INTO {0} (id, value) VALUES (?, ?)';
   var SQL_DELETE = 'DELETE FROM {0} WHERE id = ?';
   var SQL_COUNT = 'SELECT COUNT(*) as count FROM {0}';
@@ -214,11 +215,53 @@ Stork.adapter('webkit-sqlite', 5, function()
       this.db.transaction( onTransaction, onFailure );
     },
 
+    _remove: function(key, rawKey, value, promise)
+    {
+      var stork = this;
+      
+      var onTransaction = function(tx) 
+      {
+        tx.executeSql( stork.SQL_DELETE, [rawKey], onSuccess, onFailure );
+      };
+      var onSuccess = function(tx, results) 
+      {
+        stork.cache.remove( rawKey );
+
+        promise.$success( [value, key] );
+      };
+      var onFailure = function(tx, error) 
+      {
+        promise.$failure( [key, error] );
+      };
+
+      this.db.transaction( onTransaction, onFailure );
+    },
+
+    _size: function(promise)
+    {
+      var stork = this;
+
+      var onFailure = function(tx, error) 
+      {
+        promise.$failure( [error] );
+      };
+      var onTransaction = function(tx)
+      {
+        tx.executeSql( stork.SQL_COUNT, [], onCount, onFailure );
+      };
+      var onCount = function(tx, results)
+      {
+        promise.$success( [results.rows[0].count] );
+      };
+
+      this.db.readTransaction( onTransaction, onFailure );
+    },
+
     batch: function(records, success, failure)
     {
       var promise = new Promise( this, success, failure );
 
-      if ( this.handlePending( this.batch, arguments, promise ) ) 
+      if ( this.handlePending( this.batch, arguments, promise ) )
       {
         return promise;
       }
@@ -284,42 +327,20 @@ Stork.adapter('webkit-sqlite', 5, function()
         promise.$failure( [records, successful, error] );
       };
 
-      this.db.transaction( onTransaction, onFailure );     
+      this.db.transaction( onTransaction, onFailure );
 
       return promise;
-    },
-
-    _remove: function(key, rawKey, value, promise)
-    {
-      var stork = this;
-      
-      var onTransaction = function(tx) 
-      {
-        tx.executeSql( stork.SQL_DELETE, [rawKey], onSuccess, onFailure );
-      };
-      var onSuccess = function(tx, results) 
-      {
-        stork.cache.remove( rawKey );
-
-        promise.$success( [value, key] );
-      };
-      var onFailure = function(tx, error) 
-      {
-        promise.$failure( [key, error] );
-      };
-
-      this.db.transaction( onTransaction, onFailure );
     },
 
     removeMany: function(keys, success, failure)
     {
       var promise = new Promise( this, success, failure );
 
-      if ( this.handlePending( this.removeMany, arguments, promise ) ) 
+      if ( this.handlePending( this.removeMany, arguments, promise ) )
       {
         return promise;
       }
-      
+
       var stork = this;
       var rawKeys = [];
       var values = []; 
@@ -373,25 +394,87 @@ Stork.adapter('webkit-sqlite', 5, function()
       return promise;
     },
 
-    _size: function(promise)
+    getMany: function(keys, success, failure)
     {
-      var stork = this;
+      var promise = new Promise( this, success, failure );
 
+      if ( this.handlePending( this.removeMany, arguments, promise ) )
+      {
+        return promise;
+      }
+
+      var stork = this;
+      var rawKeys = [];
+      var keyToValueIndex = [];
+      var values = [];
+      var binder = [];
+      var query = '';
+
+      var onTransaction = function(tx) 
+      {
+        tx.executeSql( query, rawKeys, onSuccess, onFailure );
+      };
+      var onSuccess = function(tx, results) 
+      {
+        for (var i = 0; i < results.rows.length; i++)
+        {
+          var r = results.rows[ i ];
+
+          for (var k = 0; k < rawKeys.length; k++)
+          {
+            if ( rawKeys[ k ] === r.id )
+            {
+              values[ keyToValueIndex[ k ] ] = fromJson( r.value );
+            }
+          }
+        }
+
+        promise.$success( [values, keys] );
+      };
       var onFailure = function(tx, error) 
       {
-        promise.$failure( [error] );
-      };
-      var onTransaction = function(tx)
-      {
-        tx.executeSql( stork.SQL_COUNT, [], onCount, onFailure );
-      };
-      var onCount = function(tx, results)
-      {
-        promise.$success( [results.rows[0].count] );
+        promise.$failure( [keys, error] );
       };
 
-      this.db.readTransaction( onTransaction, onFailure );
-    },
+      try
+      {
+        for (var i = 0; i < keys.length; i++) 
+        {
+          var key = toJson( keys[ i ] );
+
+          if ( this.cache.has( key ) )
+          {
+            values[ i ] = this.cache.get( key );
+          }
+          else
+          {
+            rawKeys.push( key );
+            keyToValueIndex.push( i );
+            binder.push( '?' );
+          }
+        }
+
+        query = streplace( SQL_SELECT_MANY, [this.name, binder.join(',')] );          
+      }
+      catch (e)
+      {
+        promise.$failure( [values, e] );
+      }
+
+      if ( promise.$pending() )
+      {
+        if ( rawKeys.length )
+        {
+          this.db.transaction( onTransaction, onFailure );
+        }
+        else
+        {
+          promise.$success( [values, keys] );
+        }
+      }
+
+      return promise;
+    }
 
   }
 });

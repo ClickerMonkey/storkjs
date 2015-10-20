@@ -214,6 +214,116 @@ FastMap.prototype =
   size: function()
   {
     return this.values.length;
+  },
+
+  /**
+   * Reverses the order of the underlying values & keys.
+   * 
+   * @return {Stork.FastMap} -
+   *         The referense to this map.
+   */
+  reverse: function()
+  {
+    var max = this.size() - 1;
+    var half = Math.ceil( max / 2 );
+
+    for (var i = 0; i < half; i++)
+    {
+      swap( this.values, i, max - i );
+      swap( this.keys, i, max - i );
+      swap( this.okeys, i, max - i );
+    }
+
+    this.rebuildIndex();
+
+    return this;
+  },
+
+  /**
+   * Sorts the underlying values & keys given a value compare function.
+   * 
+   * @param  {function} comparator
+   *         A function which accepts two values and returns a number used for
+   *         sorting. If the first argument is less than the second argument, a
+   *         negative number should be returned. If the arguments are equivalent
+   *         then 0 should be returned, otherwise a positive number should be
+   *         returned.
+   * @return {Stork.FastMap} -
+   *         The reference to this map.
+   */
+  sort: function(comparator)
+  {
+    var map = this;
+
+    // Sort this partition!
+    function partition(left, right)
+    {
+      var pivot = map.values[ Math.floor((right + left) / 2) ];
+      var i = left;
+      var j = right;
+
+      while (i <= j) 
+      {
+        while (comparator( map.values[i], pivot ) < 0) i++
+        while (comparator( map.values[j], pivot ) > 0) j--;
+
+        if (i <= j) {
+          swap( map.values, i, j );
+          swap( map.keys, i, j );
+          swap( map.okeys, i, j );
+          i++;
+          j--;
+        }
+      }
+
+      return i;
+    }
+
+    // Quicksort
+    function qsort(left, right)
+    {
+      var index = partition( left, right );
+
+      if (left < index - 1) 
+      {
+        qsort( left, index - 1 );
+      }
+
+      if (index < right) 
+      {
+        qsort( index, right );
+      }
+    }
+
+    var right = this.size() - 1;
+
+    // Are there elements to sort?
+    if ( right > 0 )
+    {
+      qsort( 0, right );
+
+      this.rebuildIndex();
+    }
+
+    return this;
+  },
+
+  /**
+   * Rebuilds the index based on the keys.
+   * 
+   * @return {Stork.FastMap} -
+   *         The reference to this map.
+   */
+  rebuildIndex: function()
+  {
+    this.indices = {};
+
+    for (var i = 0; i <= right; i++)
+    {
+      this.indices[ this.keys[ i ] ] = i;
+    }
+
+    return this;
   }
 
 };

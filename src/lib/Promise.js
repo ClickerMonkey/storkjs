@@ -122,7 +122,7 @@ Promise.prototype =
    *         The function to invoke with the success arguments.
    * @param  {function} [failure]
    *         The function to invoke with the failure arguments.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The next promise to invoke when the returned promise from the 
    *         success callback finishes.
    */
@@ -153,7 +153,7 @@ Promise.prototype =
    * 
    * @param  {function} error
    *         A function to invoke if any of the promises fail.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         A reference to this promise.
    */
   error: function(error)

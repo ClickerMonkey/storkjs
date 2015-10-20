@@ -36,6 +36,17 @@ StorkJS uses the most preferred & supported storage available based on your brow
 - [`all([success], [failure])`](http://clickermonkey.github.io/storkjs/Stork#all): Returns all keys and values to the callback
 - [`size([success], [failure])`](http://clickermonkey.github.io/storkjs/Stork#size): Returns the number of key-value pairs to the callback
 
+#### Functionality added through plugins
+- [`where(condition, [success], [failure])`](http://clickermonkey.github.io/storkjs/Stork#where): Returns a subset of all key-value pairs that match some condition
+- [`select(columns, [success], [failure])`](https://clickermonkey.github.io/storkjs/Stork#select): Returns an array of specified properties
+- [`sort(comparator, [success], [failure])`](https://clickermonkey.github.io/storkjs/Stork#sort): Sorts keys and values and returns the sorted value
+- [`aggregate(property, accumulate, getResult, [success], [failure])`](https://clickermonkey.github.io/storkjs/Stork#aggregate): Performs an aggregation on a property
+- [`count(property, [success], [failure])`](https://clickermonkey.github.io/storkjs/Stork#count): Returns the number of objects with a property
+- [`sum(property, [success], [failure])`](https://clickermonkey.github.io/storkjs/Stork#sum): Returns the sum of a property on object values
+- [`avg(property, [success], [failure])`](https://clickermonkey.github.io/storkjs/Stork#avg): Returns the average of a property on object values
+- [`min(property, [success], [failure])`](https://clickermonkey.github.io/storkjs/Stork#min): Returns the minimum value of a property on object values
+- [`max(property, [success], [failure])`](https://clickermonkey.github.io/storkjs/Stork#max): Returns the maximum value of a property on object values
+
 #### Examples
 *Using StorkJS as a record store*
 
@@ -156,4 +167,4 @@ Once built, view `test/index.html` in the browser.
 - [ ] Add IE Userdata storage
 - [ ] Add IndexedDB storage
 - [ ] Add CouchDB storage
-[ ] Add CouchDB storage
+- [ ] Add CouchDB storage

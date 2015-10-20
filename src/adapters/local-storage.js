@@ -151,9 +151,17 @@ Stork.adapter('local-storage', 3, function()
       try
       { 
         var rawValue = store.getItem( rawKey );
-        var value = fromJson( rawValue );
 
-        promise.$success( [value, key] );
+        if ( rawValue === null )
+        {
+          promise.$success( [undefined, key] );
+        }
+        else
+        {
+          var value = fromJson( rawValue );
+
+          promise.$success( [value, key] ); 
+        }
       }
       catch (e)
       {

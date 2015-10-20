@@ -24,6 +24,16 @@ function isNumber(x)
   return typeof x === 'number' && !isNaN(x);
 }
 
+function isArray(x)
+{
+  return x instanceof Array;
+}
+
+function isString(x)
+{
+  return typeof x === 'string';
+}
+
 function undef(x)
 {
   return typeof x === 'undefined';
@@ -40,6 +50,13 @@ function coalesce(a, b, c, d)
   if (def(b)) return b;
   if (def(c)) return c;
   return d;
+}
+
+function swap(arr, i, j)
+{
+  var temp = arr[i]; 
+  arr[i] = arr[j]; 
+  arr[j] = temp;
 }
 
 function noop()
@@ -62,6 +79,8 @@ function copy(from, to)
   {
     to[ prop ] = from[ prop ];
   }
+
+  return to;
 }
 
 function S4() 
@@ -79,6 +98,29 @@ function compareAdapters(a, b)
   var d = b.priority - a.priority;
 
   return d === 0 ? 0 : (d < 0 ? -1 : 1);
+}
+
+function $promise(methodName, func)
+{
+  return function()
+  {
+    var promise = new Promise( this, success, failure );
+
+    if ( this.handlePending( this[ methodName ], arguments, promise ) ) 
+    {
+      return promise;
+    }
+
+    var args = Array.prototype.slice.call( arguments );
+    args.pop(); // remove failure
+    args.pop(); // remove success
+    args.push( promise ); // add promise
+
+    // Call the wrapped function
+    func.apply( this, args );
+
+    return promise;
+  };
 }
 
 function getAdapter(adapterName)
@@ -142,6 +184,12 @@ function getAdapter(adapterName)
  */
 function Stork(options, success, failure)
 {
+  // If this wasn't called as a constructor, return an instance!
+  if (!(this instanceof Stork)) return new Stork( options, success, failure );
+
+  // JSON is required for StorkJS
+  if (!JSON) throw 'JSON unavailable! Include http://www.json.org/json2.js to fix.';
+
   /**
    * The options passed to the constructor and subsequently to the 
    * {@link Stork#init} function.
@@ -276,7 +324,7 @@ Stork.prototype =
    *         The arguments of the calling function
    * @param  {Stork.Promise} promise 
    *         The promise to notify when the function is finally called.
-   * @return {Boolean} 
+   * @return {Boolean} -
    *         Returns true if the calling function should return this
    *         immediately because the implementation isn't initialized yet.
    */
@@ -304,7 +352,7 @@ Stork.prototype =
    * @private
    * @param  {Stork.Promise} promise
    *         The promise for {@link Stork#init} or {@link Stork#reload}.
-   * @return {Stork} 
+   * @return {Stork} -
    *         A reference to this.
    */
   finishInitialization: function(promise, args) 
@@ -396,7 +444,7 @@ Stork.prototype =
    *         initializes and is usable.
    * @param  {Stork~initFailure} [failure]
    *         The function to invoke if there's a problem initializing.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -446,7 +494,7 @@ Stork.prototype =
    * @param  {Stork~reloadFailure} [failure]
    *         The function to invoke if there was a problem loading all key-value
    *         pairs.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -477,7 +525,7 @@ Stork.prototype =
    * 
    * @param  {function} callback
    *         The callback to invoke with this Stork instance as `this`.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The callback should return a Promise to chain additional functions.
    */
   then: function(callback)
@@ -527,7 +575,7 @@ Stork.prototype =
    *         THe function to invoke with the values found.
    * @param  {Stork~getManyFailure} [failure]
    *         The function to invoke if there was a problem getting values.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -535,7 +583,7 @@ Stork.prototype =
   {
     var promise = new Promise( this, success, failure );
 
-    if ( this.handlePending( this.get, arguments, promise ) ) 
+    if ( this.handlePending( this.getMany, arguments, promise ) ) 
     {
       return promise;
     }
@@ -611,11 +659,11 @@ Stork.prototype =
    *         The function to invoke if a value is successfully found or not found.
    * @param  {Stork~getFailure} [failure]
    *         The function to invoke if there was a problem.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
-  get: function(key, success, failure)
+  get: function (key, success, failure)
   {
     var promise = new Promise( this, success, failure );
 
@@ -694,7 +742,7 @@ Stork.prototype =
    * @param  {Stork~destroyFailure} [failure]
    *         The function invoked if there was a problem removing all key-value
    *         pairs.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -761,7 +809,7 @@ Stork.prototype =
    *         The function to invoke when the record is successfully saved.
    * @param  {Stork~saveFailure} [failure]
    *         The function to invoke if the record fails to save.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -842,8 +890,8 @@ Stork.prototype =
    * @param  {Stork~batchSuccess} [success]
    *         The function to invoke when all records are successfully saved.
    * @param  {Stork~batchFailure} [failure]
-   *         THe function to invoke if any of the records failed to save.
-   * @return {Stork.Promise}
+   *         The function to invoke if any of the records failed to save.
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -929,7 +977,7 @@ Stork.prototype =
    * @param  {Stork~putFailure} [failure]
    *         The function to invoke if there was a problem putting the key-value
    *         pair.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -1005,11 +1053,12 @@ Stork.prototype =
    * ```
    * 
    * @param  {Any} key
+   *         The key of the key-value pair to remove.
    * @param  {Stork~removeSuccess} [success]
    *         The function to invoke then the key is removed or doesn't exist.
    * @param  {Stork~removeFailure} [failure]
    *         The function to invoke if there was a problem removing the key.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -1103,7 +1152,7 @@ Stork.prototype =
    * @param  {Stork~removeManyFailure} [failure]
    *         The function to invoke if there was a problem removing any of the
    *         key-value pairs.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -1182,7 +1231,7 @@ Stork.prototype =
    * @param  {Stork~eachFailure} [failure]
    *         The function to invoke if there was a problem iterating the 
    *         key-value pairs.
-   * @return {Stork}
+   * @return {Stork} -
    *         The reference to this Stork instance.
    */
   each: function(callback, failure)
@@ -1252,7 +1301,7 @@ Stork.prototype =
    * @param  {Stork~sizeFailure} [failure]
    *         The function to invoke if there was a problem determining the
    *         number of key-value pairs.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -1319,7 +1368,7 @@ Stork.prototype =
    *         The function to invoke with all the key-value pairs.
    * @param  {Stork~allFailure} [failure]
    *         The function to invoke if this Stork was unable to return all of the key-value pairs.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -1483,7 +1532,7 @@ Promise.prototype =
    *         The function to invoke with the success arguments.
    * @param  {function} [failure]
    *         The function to invoke with the failure arguments.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The next promise to invoke when the returned promise from the 
    *         success callback finishes.
    */
@@ -1514,7 +1563,7 @@ Promise.prototype =
    * 
    * @param  {function} error
    *         A function to invoke if any of the promises fail.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         A reference to this promise.
    */
   error: function(error)
@@ -1855,6 +1904,116 @@ FastMap.prototype =
   size: function()
   {
     return this.values.length;
+  },
+
+  /**
+   * Reverses the order of the underlying values & keys.
+   * 
+   * @return {Stork.FastMap} -
+   *         The referense to this map.
+   */
+  reverse: function()
+  {
+    var max = this.size() - 1;
+    var half = Math.ceil( max / 2 );
+
+    for (var i = 0; i < half; i++)
+    {
+      swap( this.values, i, max - i );
+      swap( this.keys, i, max - i );
+      swap( this.okeys, i, max - i );
+    }
+
+    this.rebuildIndex();
+
+    return this;
+  },
+
+  /**
+   * Sorts the underlying values & keys given a value compare function.
+   * 
+   * @param  {function} comparator
+   *         A function which accepts two values and returns a number used for
+   *         sorting. If the first argument is less than the second argument, a
+   *         negative number should be returned. If the arguments are equivalent
+   *         then 0 should be returned, otherwise a positive number should be
+   *         returned.
+   * @return {Stork.FastMap} -
+   *         The reference to this map.
+   */
+  sort: function(comparator)
+  {
+    var map = this;
+
+    // Sort this partition!
+    function partition(left, right)
+    {
+      var pivot = map.values[ Math.floor((right + left) / 2) ];
+      var i = left;
+      var j = right;
+
+      while (i <= j) 
+      {
+        while (comparator( map.values[i], pivot ) < 0) i++
+        while (comparator( map.values[j], pivot ) > 0) j--;
+
+        if (i <= j) {
+          swap( map.values, i, j );
+          swap( map.keys, i, j );
+          swap( map.okeys, i, j );
+          i++;
+          j--;
+        }
+      }
+
+      return i;
+    }
+
+    // Quicksort
+    function qsort(left, right)
+    {
+      var index = partition( left, right );
+
+      if (left < index - 1) 
+      {
+        qsort( left, index - 1 );
+      }
+
+      if (index < right) 
+      {
+        qsort( index, right );
+      }
+    }
+
+    var right = this.size() - 1;
+
+    // Are there elements to sort?
+    if ( right > 0 )
+    {
+      qsort( 0, right );
+
+      this.rebuildIndex();
+    }
+
+    return this;
+  },
+
+  /**
+   * Rebuilds the index based on the keys.
+   * 
+   * @return {Stork.FastMap} -
+   *         The reference to this map.
+   */
+  rebuildIndex: function()
+  {
+    this.indices = {};
+
+    for (var i = 0; i <= right; i++)
+    {
+      this.indices[ this.keys[ i ] ] = i;
+    }
+
+    return this;
   }
 
 };
@@ -1887,7 +2046,8 @@ Stork.plugins = [];
  * 
  * @param  {Stork~plugin} definition 
  *         The function invoked on every Stork instance.
- * @return {Stork} The Stork namespace.
+ * @return {Stork} -
+ *         The Stork namespace.
  */
 Stork.plugin = function(definition)
 {
@@ -1940,7 +2100,8 @@ Stork.adapters = [];
  *         The definition of the adapter which is either an object of methods 
  *         to overwrite for the Stork instance, or a function which returns a 
  *         similar object.
- * @return {Stork} The Stork namespace.
+ * @return {Stork} - 
+ *         The Stork namespace.
  */
 Stork.adapter = function(name, priority, definition)
 {
@@ -1953,6 +2114,631 @@ Stork.adapter = function(name, priority, definition)
 
   return Stork;
 };
+Stork.plugin((function()
+{
+
+  /**
+   * The format of success callback for aggregation functions.
+   * 
+   * @callback Stork~aggregateSuccess
+   * @param {Number} aggregatedValue
+   *        The result of the aggregation function.
+   */
+
+  /**
+   * The format of failure callback for aggregation functions.
+   * 
+   * @callback Stork~aggregateFailure
+   * @param {Any} error 
+   *        The error that was thrown.
+   */
+  
+  /**
+   * The format of an accumulation callback for aggregation functions.
+   *
+   * @callback Stork~aggregateAccumulate
+   * @param {Any} value
+   *        The value to process for accumulation.
+   */
+  
+  /**
+   * The format of an accumulation callback for aggregation functions.
+   *
+   * @callback Stork~aggregateResult
+   * @return {Any}
+   *         The result of the accumulated values.
+   */
+
+  /**
+   * Performs an aggregation on key-value pairs where the value is an `Object` 
+   * which may have a specific property to aggregate. The result of the 
+   * aggregation is returned to the callback.
+   *
+   * This is part of the aggregation plugin.
+   * 
+   * @memberOf Stork#
+   * @param  {String} property
+   *         The property on the object to pass to the accumulation function.
+   * @param  {Stork~aggregateAccumulate} accumulate
+   *         The function to invoke with the value of the property.
+   * @param  {Stork~aggregateResult} getResult
+   *         The function to call at the end to returned the aggregated value.
+   * @param  {Stork~aggregateSuccess} [success]
+   *         The function to invoke when a value is successfully aggregated.
+   * @param  {Stork~aggregateSuccess} [failure]
+   *         The function to invoke if there's a problem.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function aggregate(property, accumulate, getResult, promise)
+  {
+    var onSuccess = function(values, keys)
+    {
+      var returnedValue = undefined;
+
+      for (var i = 0; i < values.length; i++)
+      {
+        var v = values[ i ];
+
+        if (isObject( v ) && property in v)
+        {
+          accumulate( v[ property ] );
+        }
+      }
+
+      promise.$success( [ getResult() ] )
+    };
+    var onFailure = function(e)
+    {
+      promise.$failure( [e] );
+    };
+
+    this.all( onSuccess, onFailure );
+  }
+
+  /**
+   * Returns the number of values that are objects and have the specified 
+   * property to the callback.
+   *
+   * This is part of the aggregation plugin.
+   *
+   * *Usage*
+   * ```javascript
+   * db.count('name', function(count) {
+   *   // count = the number of objects with the property 'name'
+   * });
+   * ```
+   * 
+   * @memberOf Stork#
+   * @param  {String} property
+   *         The property on the object to look for.
+   * @param  {Stork~aggregateSuccess} [success]
+   *         The function to invoke with the number of values with the property.
+   * @param  {Stork~aggregateSuccess} [failure]
+   *         The function to invoke if there's a problem.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function count(property, promise)
+  {
+    var total = 0;
+
+    var accumulate = function(v)
+    {
+      total++;
+    };
+    var getResult = function()
+    {
+      return total;
+    };
+
+    aggregate( property, accumulate, getResult, promise );
+  }
+
+  /**
+   * Returns the sum of a set of values taken from a property on all `Object` 
+   * values to the callback.
+   *
+   * This is part of the aggregation plugin.
+   * 
+   * *Usage*
+   * ```javascript
+   * db.sum('kills', function(sum) {
+   *   // sum = total of all kills
+   * });
+   * ```
+   * 
+   * @memberOf Stork#
+   * @param  {String} property
+   *         The property on the object to sum.
+   * @param  {Stork~aggregateSuccess} [success]
+   *         The function to invoke with the sum.
+   * @param  {Stork~aggregateSuccess} [failure]
+   *         The function to invoke if there's a problem.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function sum(property, promise)
+  {
+    var summing = 0;
+
+    var accumulate = function(v)
+    {
+      if (isNumber(v))
+      {
+        summing += v;
+      }
+    };
+    var getResult = function()
+    {
+      return summing;
+    };
+
+    aggregate( property, accumulate, getResult, promise );
+  }
+
+
+  /**
+   * Returns the average of a set of values taken from a property on all `Object` 
+   * values to the callback.
+   *
+   * This is part of the aggregation plugin.
+   * 
+   * *Usage*
+   * ```javascript
+   * db.avg('age', function(avg) {
+   *   // avg = the average age
+   * });
+   * ```
+   * 
+   * @memberOf Stork#
+   * @param  {String} property
+   *         The property on the object to average.
+   * @param  {Stork~aggregateSuccess} [success]
+   *         The function to invoke with the average.
+   * @param  {Stork~aggregateSuccess} [failure]
+   *         The function to invoke if there's a problem.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function avg(property, promise)
+  {
+    var summing = 0;
+    var total = 0;
+
+    var accumulate = function(v)
+    {
+      if (isNumber(v))
+      {
+        summing += v;
+        total++;
+      }
+    };
+    var getResult = function()
+    {
+      return summing / total;
+    };
+
+    aggregate( property, accumulate, getResult, promise );
+  }
+
+  /**
+   * Returns the minimum value of a set of values taken from a property on all 
+   * `Object` values to the callback.
+   *
+   * This is part of the aggregation plugin.
+   * 
+   * *Usage*
+   * ```javascript
+   * db.min('age', function(min) {
+   *   // min = the minimum age
+   * });
+   * ```
+   * 
+   * @memberOf Stork#
+   * @param  {String} property
+   *         The property on the object to find the minimum value of.
+   * @param  {Stork~aggregateSuccess} [success]
+   *         The function to invoke with the minimum value.
+   * @param  {Stork~aggregateSuccess} [failure]
+   *         The function to invoke if there's a problem.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function min(property, promise)
+  {
+    var minValue = Number.MAX_VALUE;
+
+    var accumulate = function(v)
+    {
+      if (isNumber(v))
+      {
+        minValue = Math.min( minValue, v );
+      }
+    };
+    var getResult = function()
+    {
+      return minValue;
+    };
+
+    aggregate( property, accumulate, getResult, promise );
+  }
+
+  /**
+   * Returns the maximum value of a set of values taken from a property on all 
+   * `Object` values to the callback.
+   *
+   * This is part of the aggregation plugin.
+   * 
+   * *Usage*
+   * ```javascript
+   * db.max('age', function(max) {
+   *   // max = the maximum age
+   * });
+   * ```
+   * 
+   * @memberOf Stork#
+   * @param  {String} property
+   *         The property on the object to find the maximum value of.
+   * @param  {Stork~aggregateSuccess} [success]
+   *         The function to invoke with the maximum value.
+   * @param  {Stork~aggregateSuccess} [failure]
+   *         The function to invoke if there's a problem.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function max(property, promise)
+  {
+    var maxValue = Number.MAX_VALUE;
+
+    var accumulate = function(v)
+    {
+      if (isNumber(v))
+      {
+        maxValue = Math.min( maxValue, v );
+      }
+    };
+    var getResult = function()
+    {
+      return maxValue;
+    };
+
+    aggregate( property, accumulate, getResult, promise );
+  }
+
+  var METHODS = 
+  {
+    aggregate:  $promise( 'aggregate', aggregate ),
+    count:      $promise( 'count', count ),
+    sum:        $promise( 'sum', sum ),
+    avg:        $promise( 'avg', avg ),
+    min:        $promise( 'min', min ),
+    max:        $promise( 'max', max )
+  }; 
+
+  return function(stork)
+  {
+    copy( METHODS, stork );
+  };
+
+})());
+
+
+  
+Stork.plugin((function()
+{
+
+  /**
+   * The format of the condition callback for {@link Stork#where}.
+   * 
+   * @callback Stork~where
+   * @param {Any} value
+   *        The value to inspect and return true if you want it returned.
+   * @param {Any} key
+   *        The key to inspect and return true if you want it returned.
+   */
+  
+  /**
+   * The format of success callback for {@link Stork#where}.
+   * 
+   * @callback Stork~whereSuccess
+   * @param {Array} values
+   *        The values matching the given condition.
+   * @param {Array} keys
+   *        The keys matching the given condition.
+   */
+
+  /**
+   * The format of failure callback for {@link Stork#where}.
+   * 
+   * @callback Stork~whereFailure
+   * @param {Any} error 
+   *        The error that was thrown.
+   */
+
+  /**
+   * Returns a subset of key-value pairs that match a condition function to the 
+   * callback.
+   *
+   * This is part of the query plugin.
+   *
+   * *Usage*
+   * ```javascript
+   * var condition = function(value, key) {
+   *   // return true if key-value matches some condition
+   * };
+   * var onSuccessFunc = function(value, key) {
+   *   // handle success
+   * };
+   * var onFailureFunc = function(key, error) {
+   *   // uh oh!
+   * };
+   * db.where( condition, onSucessFunc, onFailureFunc ); // listen for success/failure
+   * db.where( condition ).then( onSuccessFunc, onFailureFunc ); // listen to promise
+   * ```
+   *
+   * @memberOf Stork#
+   * @param  {Stork~where} condition
+   *         The function to invoke on each key-value pair to determine whether
+   *         that pair is included in the results.
+   * @param  {Stork~whereSuccess} [success]
+   *         The function to invoke with the matched key-value pairs.
+   * @param  {Stork~whereFailure} [failure]
+   *         The function to invoke if there was a problem retrieving the
+   *         key-value pairs.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function where(condition, promise)
+  {
+    var onSuccess = function(values, keys)
+    {
+      var matchedKeys = [];
+      var matchedValues = [];
+
+      for (var i = 0; i < values.length; i++)
+      {
+        var v = values[ i ];
+        var k = keys[ i ];
+
+        if ( condition( v, k ) )
+        {
+          matchedValues.push( v );
+          matchedKeys.push( k );
+        }
+      }
+
+      promise.$success( [matchedValues, matchedKeys] );
+    };
+    var onFailure = function(e)
+    {
+      promise.$failure( [e] );
+    };
+
+    this.all( onSuccess, onFailure );
+  }
+
+  /**
+   * The format of success callback for {@link Stork#select}.
+   * 
+   * @callback Stork~selectSuccess
+   * @param {Array} values
+   *        If columns is a string this is an array of values pulled from the
+   *        same property on all values that are objects. If columns is an array
+   *        this is an array of objects containing the properties that exist
+   *        in the columns array.
+   * @param {Array} keys
+   *        An array of the keys for pointing to the original values.
+   */
+
+  /**
+   * The format of failure callback for {@link Stork#select}.
+   * 
+   * @callback Stork~selectFailure
+   * @param {String|Array} columns
+   *        The property you wanted to return or an array of properties to return.
+   * @param {Any} error 
+   *        The error that was thrown.
+   */
+  
+  /**
+   * Returns column values (if columns is a string) or an array of objects of 
+   * column values (if columns is an array) to the callback.
+   *
+   * This is part of the query plugin.
+   *
+   * *Usage*
+   * ```javascript
+   * var onSuccessFunc = function(values, keys) {
+   *   // handle success
+   * };
+   * var onFailureFunc = function(columns, error) {
+   *   // uh oh!
+   * };
+   * db.select( 'name', onSucessFunc, onFailureFunc ); // listen for success/failure
+   * db.select( ['name', 'id'] ).then( onSuccessFunc, onFailureFunc ); // listen to promise
+   * ```
+   *
+   * @memberOf Stork#
+   * @param  {String|Array} columns
+   *         The property you want to return or an array of properties to return.
+   * @param  {Stork~selectSuccess} [success]
+   *         The function to invoke with the selected properties.
+   * @param  {Stork~selectFailure} [failure]
+   *         The function to invoke if there was a problem selecting the columns.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function select(columns, promise)
+  {
+    var onSuccess = function(values, keys)
+    {
+      var results = [];
+      var resultKeys = [];
+
+      for (var i = 0; i < values.length; i++)
+      {
+        var v = values[ i ];
+
+        if ( isObject( v ) )
+        {
+          if ( isString( columns ) )
+          {
+            if ( columns in v )
+            {
+              results.push( v[ columns ] );
+              resultKeys.push( keys[ i ] );
+            }
+          }
+          else if ( isArray( columns ) )
+          {
+            var resultObject = {};
+            var resultColumns = 0;
+
+            for (var k = 0; k < columns.length; k++)
+            {
+              var c = columns[ k ];
+
+              if ( c in v )
+              {
+                resultObject[ c ] = v[ c ];
+                resultColumns++;
+              }
+            }
+
+            if ( resultColumns > 0 )
+            {
+              results.push( resultObject );
+              resultKeys.push( keys[ i ] );
+            }
+          }
+        }
+      }
+
+      promise.$success( [results, resultKeys] );
+    };
+    var onFailure = function(e)
+    {
+      promise.$failure( [columns, e] );
+    };
+
+    this.all( onSuccess, onFailure );
+  }
+
+  /**
+   * The format of the comparater for {@link Stork#sort}.
+   *
+   * @callback Stork~sortComparator
+   * @param {Any} a
+   *        The first value to compare.
+   * @param {Any} b
+   *        The second value to compare.
+   * @return {Number} -
+   *         A negative number if `a < b`, a positive number of `a > b` and 0
+   *         if `a == b`.
+   */
+
+  /**
+   * The format of success callback for {@link Stork#sort}.
+   * 
+   * @callback Stork~sortSuccess
+   * @param {Array} values
+   *        The array of sorted values.
+   * @param {Array} keys
+   *        The array of sorted keys.
+   */
+
+  /**
+   * The format of failure callback for {@link Stork#sort}.
+   * 
+   * @callback Stork~sortFailure
+   * @param {Any} error 
+   *        The error that was thrown.
+   */
+  
+  /**
+   * Sorts all key-value pairs and returns them to the callback. Next time the
+   * key-value pairs are iterated over they will be returned in the same order.
+   * The underlying structure should be considered unsorted anytime key-value
+   * pairs are updated, added, or removed.
+   *
+   * This is part of the query plugin.
+   *
+   * *Usage*
+   * ```javascript
+   * var compareFunc = function(a, b) {
+   *   // compare a & b and return a number
+   * };
+   * var onSuccessFunc = function(values, keys) {
+   *   // handle success
+   * };
+   * var onFailureFunc = function(error) {
+   *   // uh oh!
+   * };
+   * db.sort( compareFunc, false, onSucessFunc, onFailureFunc ); // listen for success/failure
+   * db.sort( compareFunc ).then( onSuccessFunc, onFailureFunc ); // listen to promise
+   * ```
+   *
+   * @memberOf Stork#
+   * @param  {Stork~sortComparator} comparator
+   *         The function used to compare two values.
+   * @param  {Boolean} desc
+   *         If the key-value pairs should be in descending (reversed) order.
+   * @param  {Stork~sortSuccess} [success]
+   *         The function to invoke with the sorted values & keys.
+   * @param  {Stork~sortFailure} [failure]
+   *         The function to invoke if there was a problem sorting the pairs.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function sort(comparator, desc, promise)
+  {
+    var onSuccess = function()
+    {
+      var cache = this.cache;
+
+      cache.sort( comparator );
+
+      if ( desc )
+      {
+        cache.reverse();
+      }
+
+      promise.$success( [cache.values, cache.okeys] );
+    };
+    var onFailure = function(e)
+    {
+      promise.$failure( [e] );
+    };
+
+    this.all( onSuccess, onFailure );
+  }
+
+  var METHODS = 
+  {
+    where:  $promise( 'where', where ),
+    select: $promise( 'select', select ),
+    sort:   $promise( 'sort', sort )
+  }; 
+
+  return function(stork)
+  {
+    copy( METHODS, stork );
+  };
+
+})());
+
+
+  
 
 Stork.adapter('chrome-storage-local', 4, function()
 {
@@ -2321,9 +3107,17 @@ Stork.adapter('local-storage', 3, function()
       try
       { 
         var rawValue = store.getItem( rawKey );
-        var value = fromJson( rawValue );
 
-        promise.$success( [value, key] );
+        if ( rawValue === null )
+        {
+          promise.$success( [undefined, key] );
+        }
+        else
+        {
+          var value = fromJson( rawValue );
+
+          promise.$success( [value, key] ); 
+        }
       }
       catch (e)
       {
@@ -2446,6 +3240,7 @@ Stork.adapter('webkit-sqlite', 5, function()
   var SQL_CREATE = 'CREATE TABLE IF NOT EXISTS {0} (id TEXT PRIMARY KEY, value TEXT)';
   var SQL_SELECT  = 'SELECT value FROM {0} WHERE id = ?';
   var SQL_SELECT_ALL = 'SELECT id, value FROM {0}';
+  var SQL_SELECT_MANY = 'SELECT id, value FROM {0} WHERE id IN ({1})';
   var SQL_INSERT = 'INSERT OR REPLACE INTO {0} (id, value) VALUES (?, ?)';
   var SQL_DELETE = 'DELETE FROM {0} WHERE id = ?';
   var SQL_COUNT = 'SELECT COUNT(*) as count FROM {0}';
@@ -2654,11 +3449,53 @@ Stork.adapter('webkit-sqlite', 5, function()
       this.db.transaction( onTransaction, onFailure );
     },
 
+    _remove: function(key, rawKey, value, promise)
+    {
+      var stork = this;
+      
+      var onTransaction = function(tx) 
+      {
+        tx.executeSql( stork.SQL_DELETE, [rawKey], onSuccess, onFailure );
+      };
+      var onSuccess = function(tx, results) 
+      {
+        stork.cache.remove( rawKey );
+
+        promise.$success( [value, key] );
+      };
+      var onFailure = function(tx, error) 
+      {
+        promise.$failure( [key, error] );
+      };
+
+      this.db.transaction( onTransaction, onFailure );
+    },
+
+    _size: function(promise)
+    {
+      var stork = this;
+
+      var onFailure = function(tx, error) 
+      {
+        promise.$failure( [error] );
+      };
+      var onTransaction = function(tx)
+      {
+        tx.executeSql( stork.SQL_COUNT, [], onCount, onFailure );
+      };
+      var onCount = function(tx, results)
+      {
+        promise.$success( [results.rows[0].count] );
+      };
+
+      this.db.readTransaction( onTransaction, onFailure );
+    },
+
     batch: function(records, success, failure)
     {
       var promise = new Promise( this, success, failure );
 
-      if ( this.handlePending( this.batch, arguments, promise ) ) 
+      if ( this.handlePending( this.batch, arguments, promise ) )
       {
         return promise;
       }
@@ -2724,42 +3561,20 @@ Stork.adapter('webkit-sqlite', 5, function()
         promise.$failure( [records, successful, error] );
       };
 
-      this.db.transaction( onTransaction, onFailure );     
+      this.db.transaction( onTransaction, onFailure );
 
       return promise;
-    },
-
-    _remove: function(key, rawKey, value, promise)
-    {
-      var stork = this;
-      
-      var onTransaction = function(tx) 
-      {
-        tx.executeSql( stork.SQL_DELETE, [rawKey], onSuccess, onFailure );
-      };
-      var onSuccess = function(tx, results) 
-      {
-        stork.cache.remove( rawKey );
-
-        promise.$success( [value, key] );
-      };
-      var onFailure = function(tx, error) 
-      {
-        promise.$failure( [key, error] );
-      };
-
-      this.db.transaction( onTransaction, onFailure );
     },
 
     removeMany: function(keys, success, failure)
     {
       var promise = new Promise( this, success, failure );
 
-      if ( this.handlePending( this.removeMany, arguments, promise ) ) 
+      if ( this.handlePending( this.removeMany, arguments, promise ) )
       {
         return promise;
       }
-      
+
       var stork = this;
       var rawKeys = [];
       var values = []; 
@@ -2813,25 +3628,87 @@ Stork.adapter('webkit-sqlite', 5, function()
       return promise;
     },
 
-    _size: function(promise)
+    getMany: function(keys, success, failure)
     {
-      var stork = this;
+      var promise = new Promise( this, success, failure );
 
+      if ( this.handlePending( this.removeMany, arguments, promise ) )
+      {
+        return promise;
+      }
+
+      var stork = this;
+      var rawKeys = [];
+      var keyToValueIndex = [];
+      var values = [];
+      var binder = [];
+      var query = '';
+
+      var onTransaction = function(tx) 
+      {
+        tx.executeSql( query, rawKeys, onSuccess, onFailure );
+      };
+      var onSuccess = function(tx, results) 
+      {
+        for (var i = 0; i < results.rows.length; i++)
+        {
+          var r = results.rows[ i ];
+
+          for (var k = 0; k < rawKeys.length; k++)
+          {
+            if ( rawKeys[ k ] === r.id )
+            {
+              values[ keyToValueIndex[ k ] ] = fromJson( r.value );
+            }
+          }
+        }
+
+        promise.$success( [values, keys] );
+      };
       var onFailure = function(tx, error) 
       {
-        promise.$failure( [error] );
-      };
-      var onTransaction = function(tx)
-      {
-        tx.executeSql( stork.SQL_COUNT, [], onCount, onFailure );
-      };
-      var onCount = function(tx, results)
-      {
-        promise.$success( [results.rows[0].count] );
+        promise.$failure( [keys, error] );
       };
 
-      this.db.readTransaction( onTransaction, onFailure );
-    },
+      try
+      {
+        for (var i = 0; i < keys.length; i++) 
+        {
+          var key = toJson( keys[ i ] );
+
+          if ( this.cache.has( key ) )
+          {
+            values[ i ] = this.cache.get( key );
+          }
+          else
+          {
+            rawKeys.push( key );
+            keyToValueIndex.push( i );
+            binder.push( '?' );
+          }
+        }
+
+        query = streplace( SQL_SELECT_MANY, [this.name, binder.join(',')] );          
+      }
+      catch (e)
+      {
+        promise.$failure( [values, e] );
+      }
+
+      if ( promise.$pending() )
+      {
+        if ( rawKeys.length )
+        {
+          this.db.transaction( onTransaction, onFailure );
+        }
+        else
+        {
+          promise.$success( [values, keys] );
+        }
+      }
+
+      return promise;
+    }
 
   }
 });

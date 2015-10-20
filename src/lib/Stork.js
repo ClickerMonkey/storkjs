@@ -27,6 +27,12 @@
  */
 function Stork(options, success, failure)
 {
+  // If this wasn't called as a constructor, return an instance!
+  if (!(this instanceof Stork)) return new Stork( options, success, failure );
+
+  // JSON is required for StorkJS
+  if (!JSON) throw 'JSON unavailable! Include http://www.json.org/json2.js to fix.';
+
   /**
    * The options passed to the constructor and subsequently to the 
    * {@link Stork#init} function.
@@ -161,7 +167,7 @@ Stork.prototype =
    *         The arguments of the calling function
    * @param  {Stork.Promise} promise 
    *         The promise to notify when the function is finally called.
-   * @return {Boolean} 
+   * @return {Boolean} -
    *         Returns true if the calling function should return this
    *         immediately because the implementation isn't initialized yet.
    */
@@ -189,7 +195,7 @@ Stork.prototype =
    * @private
    * @param  {Stork.Promise} promise
    *         The promise for {@link Stork#init} or {@link Stork#reload}.
-   * @return {Stork} 
+   * @return {Stork} -
    *         A reference to this.
    */
   finishInitialization: function(promise, args) 
@@ -281,7 +287,7 @@ Stork.prototype =
    *         initializes and is usable.
    * @param  {Stork~initFailure} [failure]
    *         The function to invoke if there's a problem initializing.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -331,7 +337,7 @@ Stork.prototype =
    * @param  {Stork~reloadFailure} [failure]
    *         The function to invoke if there was a problem loading all key-value
    *         pairs.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -362,7 +368,7 @@ Stork.prototype =
    * 
    * @param  {function} callback
    *         The callback to invoke with this Stork instance as `this`.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The callback should return a Promise to chain additional functions.
    */
   then: function(callback)
@@ -412,7 +418,7 @@ Stork.prototype =
    *         THe function to invoke with the values found.
    * @param  {Stork~getManyFailure} [failure]
    *         The function to invoke if there was a problem getting values.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -420,7 +426,7 @@ Stork.prototype =
   {
     var promise = new Promise( this, success, failure );
 
-    if ( this.handlePending( this.get, arguments, promise ) ) 
+    if ( this.handlePending( this.getMany, arguments, promise ) ) 
     {
       return promise;
     }
@@ -496,11 +502,11 @@ Stork.prototype =
    *         The function to invoke if a value is successfully found or not found.
    * @param  {Stork~getFailure} [failure]
    *         The function to invoke if there was a problem.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
-  get: function(key, success, failure)
+  get: function (key, success, failure)
   {
     var promise = new Promise( this, success, failure );
 
@@ -579,7 +585,7 @@ Stork.prototype =
    * @param  {Stork~destroyFailure} [failure]
    *         The function invoked if there was a problem removing all key-value
    *         pairs.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -646,7 +652,7 @@ Stork.prototype =
    *         The function to invoke when the record is successfully saved.
    * @param  {Stork~saveFailure} [failure]
    *         The function to invoke if the record fails to save.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -727,8 +733,8 @@ Stork.prototype =
    * @param  {Stork~batchSuccess} [success]
    *         The function to invoke when all records are successfully saved.
    * @param  {Stork~batchFailure} [failure]
-   *         THe function to invoke if any of the records failed to save.
-   * @return {Stork.Promise}
+   *         The function to invoke if any of the records failed to save.
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -814,7 +820,7 @@ Stork.prototype =
    * @param  {Stork~putFailure} [failure]
    *         The function to invoke if there was a problem putting the key-value
    *         pair.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -890,11 +896,12 @@ Stork.prototype =
    * ```
    * 
    * @param  {Any} key
+   *         The key of the key-value pair to remove.
    * @param  {Stork~removeSuccess} [success]
    *         The function to invoke then the key is removed or doesn't exist.
    * @param  {Stork~removeFailure} [failure]
    *         The function to invoke if there was a problem removing the key.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -988,7 +995,7 @@ Stork.prototype =
    * @param  {Stork~removeManyFailure} [failure]
    *         The function to invoke if there was a problem removing any of the
    *         key-value pairs.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -1067,7 +1074,7 @@ Stork.prototype =
    * @param  {Stork~eachFailure} [failure]
    *         The function to invoke if there was a problem iterating the 
    *         key-value pairs.
-   * @return {Stork}
+   * @return {Stork} -
    *         The reference to this Stork instance.
    */
   each: function(callback, failure)
@@ -1137,7 +1144,7 @@ Stork.prototype =
    * @param  {Stork~sizeFailure} [failure]
    *         The function to invoke if there was a problem determining the
    *         number of key-value pairs.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
@@ -1204,7 +1211,7 @@ Stork.prototype =
    *         The function to invoke with all the key-value pairs.
    * @param  {Stork~allFailure} [failure]
    *         The function to invoke if this Stork was unable to return all of the key-value pairs.
-   * @return {Stork.Promise}
+   * @return {Stork.Promise} -
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
