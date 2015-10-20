@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Source: FastMap.js</title>
+    <title>Source: plugins/query.js</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -70,6 +70,14 @@
             
             <span class="subtitle">Typedefs</span>
             
+                <li data-name="Stork~aggregateAccumulate"><a href="Stork.html#~aggregateAccumulate">aggregateAccumulate</a></li>
+            
+                <li data-name="Stork~aggregateFailure"><a href="Stork.html#~aggregateFailure">aggregateFailure</a></li>
+            
+                <li data-name="Stork~aggregateResult"><a href="Stork.html#~aggregateResult">aggregateResult</a></li>
+            
+                <li data-name="Stork~aggregateSuccess"><a href="Stork.html#~aggregateSuccess">aggregateSuccess</a></li>
+            
                 <li data-name="Stork~allFailure"><a href="Stork.html#~allFailure">allFailure</a></li>
             
                 <li data-name="Stork~allSuccess"><a href="Stork.html#~allSuccess">allSuccess</a></li>
@@ -120,9 +128,25 @@
             
                 <li data-name="Stork~saveSuccess"><a href="Stork.html#~saveSuccess">saveSuccess</a></li>
             
+                <li data-name="Stork~selectFailure"><a href="Stork.html#~selectFailure">selectFailure</a></li>
+            
+                <li data-name="Stork~selectSuccess"><a href="Stork.html#~selectSuccess">selectSuccess</a></li>
+            
                 <li data-name="Stork~sizeFailure"><a href="Stork.html#~sizeFailure">sizeFailure</a></li>
             
                 <li data-name="Stork~sizeSuccess"><a href="Stork.html#~sizeSuccess">sizeSuccess</a></li>
+            
+                <li data-name="Stork~sortComparator"><a href="Stork.html#~sortComparator">sortComparator</a></li>
+            
+                <li data-name="Stork~sortFailure"><a href="Stork.html#~sortFailure">sortFailure</a></li>
+            
+                <li data-name="Stork~sortSuccess"><a href="Stork.html#~sortSuccess">sortSuccess</a></li>
+            
+                <li data-name="Stork~where"><a href="Stork.html#~where">where</a></li>
+            
+                <li data-name="Stork~whereFailure"><a href="Stork.html#~whereFailure">whereFailure</a></li>
+            
+                <li data-name="Stork~whereSuccess"><a href="Stork.html#~whereSuccess">whereSuccess</a></li>
             
             </ul>
             <ul class="methods itemMembers">
@@ -133,9 +157,15 @@
             
                 <li data-name="Stork.plugin"><a href="Stork.html#.plugin">plugin</a></li>
             
+                <li data-name="Stork#aggregate"><a href="Stork.html#aggregate">aggregate</a></li>
+            
                 <li data-name="Stork#all"><a href="Stork.html#all">all</a></li>
             
+                <li data-name="Stork#avg"><a href="Stork.html#avg">avg</a></li>
+            
                 <li data-name="Stork#batch"><a href="Stork.html#batch">batch</a></li>
+            
+                <li data-name="Stork#count"><a href="Stork.html#count">count</a></li>
             
                 <li data-name="Stork#destroy"><a href="Stork.html#destroy">destroy</a></li>
             
@@ -147,6 +177,10 @@
             
                 <li data-name="Stork#init"><a href="Stork.html#init">init</a></li>
             
+                <li data-name="Stork#max"><a href="Stork.html#max">max</a></li>
+            
+                <li data-name="Stork#min"><a href="Stork.html#min">min</a></li>
+            
                 <li data-name="Stork#put"><a href="Stork.html#put">put</a></li>
             
                 <li data-name="Stork#reload"><a href="Stork.html#reload">reload</a></li>
@@ -157,11 +191,19 @@
             
                 <li data-name="Stork#save"><a href="Stork.html#save">save</a></li>
             
+                <li data-name="Stork#select"><a href="Stork.html#select">select</a></li>
+            
                 <li data-name="Stork#size"><a href="Stork.html#size">size</a></li>
+            
+                <li data-name="Stork#sort"><a href="Stork.html#sort">sort</a></li>
+            
+                <li data-name="Stork#sum"><a href="Stork.html#sum">sum</a></li>
             
                 <li data-name="Stork#then"><a href="Stork.html#then">then</a></li>
             
                 <li data-name="Stork#valid"><a href="Stork.html#valid">valid</a></li>
+            
+                <li data-name="Stork#where"><a href="Stork.html#where">where</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -270,342 +312,321 @@
     </ul>
 </div>
     <div class="main">
-        <h1 class="page-title" data-filename="FastMap.js.html">Source: FastMap.js</h1>
+        <h1 class="page-title" data-filename="plugins_query.js.html">Source: plugins/query.js</h1>
         
 
 
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-/**
- * A FastMap has the key-to-value benefits of a map and iteration benefits of an
- * array. This is especially beneficial when most of the time the contents of 
- * the structure need to be iterated and order doesn't matter (since removal 
- * performs a swap which breaks insertion order).
- *
- * @constructor
- * @memberOf Stork
- * @param {Stork.FastMap|object} [map]
- */
-function FastMap(map)
-{
-  this.reset();
-  this.putMap( map );
-}
-
-FastMap.prototype =
+            <pre class="prettyprint source linenums"><code>Stork.plugin((function()
 {
 
   /**
-   * Resets the map by initializing the values, keys, and indexes.
+   * The format of the condition callback for {@link Stork#where}.
    * 
-   * @return {Stork.FastMap}
+   * @callback Stork~where
+   * @param {Any} value
+   *        The value to inspect and return true if you want it returned.
+   * @param {Any} key
+   *        The key to inspect and return true if you want it returned.
    */
-  reset: function()
-  {
-    /**
-     * An array of the values in this map.
-     * @member {Array}
-     */
-    this.values = [];
-
-    /**
-     * An array of the keys in this map.
-     * @type {Array}
-     */
-    this.keys = [];
-
-    /**
-     * An array of the original keys in this map.
-     * @type {Array}
-     */
-    this.okeys = [];
-
-    /**
-     * An object of key to index mappings.
-     * @type {Object}
-     */
-    this.indices = {};
-
-    return this;
-  },
-
+  
   /**
-   * Puts the value in the map by the given key.
-   *
-   * @param {String} key
-   * @param {V} value
-   * @param {K} originalKey
-   * @return {Stork.FastMap}
-   */
-  put: function(key, value, originalKey)
-  {
-    if ( key in this.indices )
-    {
-      this.values[ this.indices[ key ] ] = value;
-    }
-    else
-    {
-      this.indices[ key ] = this.values.length;
-      this.values.push( value );
-      this.keys.push( key );
-      this.okeys.push( originalKey );
-    }
-
-    return this;
-  },
-
-  /**
-   * Puts all keys &amp; values on the given map into this map overwriting any existing values mapped by similar keys.
-   *
-   * @param {FastMap|Object} map
-   * @return {Stork.FastMap}
-   */
-  putMap: function(map)
-  {
-    if (map instanceof FastMap)
-    {
-      var keys = map.keys;
-      var values = map.values;
-      var okeys = map.okeys;
-
-      for (var i = 0; i &lt; keys.length; i++)
-      {
-        this.put( keys[ i ], values[ i ], okeys[ i ] );
-      }
-    }
-    else if ( isObject( map ) )
-    {
-      for (var key in map)
-      {
-        this.put( key, map[ key ], key );
-      }
-    }
-
-    return this;
-  },
-
-  /**
-   * Returns the value mapped by the given key.
-   *
-   * @param {String} key
-   * @return {V}
-   */
-  get: function(key)
-  {
-    return this.values[ this.indices[ key ] ];
-  },
-
-  /**
-   * Removes the value by a given key
-   *
-   * @param {String} key
-   * @return {Stork.FastMap}
-   */
-  remove: function(key)
-  {
-    var index = this.indices[ key ];
-
-    if ( isNumber( index ) )
-    {
-      this.removeAt( index );
-    }
-
-    return this;
-  },
-
-  /**
-   * Removes the value &amp; key at the given index.
-   *
-   * @param {Number} index
-   * @return {Stork.FastMap}
-   */
-  removeAt: function(index)
-  {
-    var key = this.keys[ index ];
-    var lastValue = this.values.pop();
-    var lastKey = this.keys.pop();
-    var lastOkey = this.okeys.pop();
-
-    if ( index &lt; this.values.length )
-    {
-      this.values[ index ] = lastValue;
-      this.keys[ index ] = lastKey;
-      this.okeys[ index ] = lastOkey; 
-      this.indices[ lastKey ] = index;
-    }
-
-    delete this.indices[ key ];
-
-    return this;
-  },
-
-  /**
-   * Returns the index of the value in the array given a key.
-   *
-   * @param {String} key
-   * @return {Number}
-   */
-  indexOf: function(key)
-  {
-    return coalesce( this.indices[ key ], -1 );
-  },
-
-  /**
-   * Returns whether this map has a value for the given key.
-   *
-   * @param {String} key
-   * @return {Boolean}
-   */
-  has: function(key)
-  {
-    return key in this.indices;
-  },
-
-  /**
-   * Returns whether the given input has overlap with keys in this map.
-   *
-   * @param {FastMap|Object} map
-   * @return {Boolean}
-   */
-  hasOverlap: function(map)
-  {
-    var keys = this.keys;
-    var indices = map.indices;
-
-    for (var i = 0; i &lt; keys.length; i++)
-    {
-      if ( keys[i] in indices )
-      {
-        return true;
-      }
-    }
-   
-    return false;
-  },
-
-  /**
-   * Returns the number of elements in the map.
-   *
-   * @return {Number}
-   */
-  size: function()
-  {
-    return this.values.length;
-  },
-
-  /**
-   * Reverses the order of the underlying values &amp; keys.
+   * The format of success callback for {@link Stork#where}.
    * 
-   * @return {Stork.FastMap}
-   *         The referense to this map.
+   * @callback Stork~whereSuccess
+   * @param {Array} values
+   *        The values matching the given condition.
+   * @param {Array} keys
+   *        The keys matching the given condition.
    */
-  reverse: function()
-  {
-    var max = this.size() - 1;
-    var half = Math.ceil( max / 2 );
-
-    for (var i = 0; i &lt; half; i++)
-    {
-      swap( this.values, i, max - i );
-      swap( this.keys, i, max - i );
-      swap( this.okeys, i, max - i );
-    }
-
-    this.rebuildIndex();
-
-    return this;
-  },
 
   /**
-   * Sorts the underlying values &amp; keys given a value compare function.
+   * The format of failure callback for {@link Stork#where}.
    * 
-   * @param  {function} comparator
-   *         A function which accepts two values and returns a number used for
-   *         sorting. If the first argument is less than the second argument, a
-   *         negative number should be returned. If the arguments are equivalent
-   *         then 0 should be returned, otherwise a positive number should be
-   *         returned.
-   * @return {Stork.FastMap}
-   *         The reference to this map.
+   * @callback Stork~whereFailure
+   * @param {Any} error 
+   *        The error that was thrown.
    */
-  sort: function(comparator)
+
+  /**
+   * Returns a subset of key-value pairs that match a condition function to the 
+   * callback.
+   *
+   * This is part of the query plugin.
+   *
+   * *Usage*
+   * ```javascript
+   * var condition = function(value, key) {
+   *   // return true if key-value matches some condition
+   * };
+   * var onSuccessFunc = function(value, key) {
+   *   // handle success
+   * };
+   * var onFailureFunc = function(key, error) {
+   *   // uh oh!
+   * };
+   * db.where( condition, onSucessFunc, onFailureFunc ); // listen for success/failure
+   * db.where( condition ).then( onSuccessFunc, onFailureFunc ); // listen to promise
+   * ```
+   *
+   * @memberOf Stork#
+   * @param  {Stork~where} condition
+   *         The function to invoke on each key-value pair to determine whether
+   *         that pair is included in the results.
+   * @param  {Stork~whereSuccess} [success]
+   *         The function to invoke with the matched key-value pairs.
+   * @param  {Stork~whereFailure} [failure]
+   *         The function to invoke if there was a problem retrieving the
+   *         key-value pairs.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function where(condition, promise)
   {
-    var map = this;
-
-    // Sort this partition!
-    function partition(left, right)
+    var onSuccess = function(values, keys)
     {
-      var pivot = map.values[ Math.floor((right + left) / 2) ];
-      var i = left;
-      var j = right;
+      var matchedKeys = [];
+      var matchedValues = [];
 
-      while (i &lt;= j) 
+      for (var i = 0; i &lt; values.length; i++)
       {
-        while (comparator( map.values[i], pivot ) &lt; 0) i++
-        while (comparator( map.values[j], pivot ) > 0) j--;
+        var v = values[ i ];
+        var k = keys[ i ];
 
-        if (i &lt;= j) {
-          swap( map.values, i, j );
-          swap( map.keys, i, j );
-          swap( map.okeys, i, j );
-          i++;
-          j--;
+        if ( condition( v, k ) )
+        {
+          matchedValues.push( v );
+          matchedKeys.push( k );
         }
       }
 
-      return i;
-    }
-
-    // Quicksort
-    function qsort(left, right)
+      promise.$success( [matchedValues, matchedKeys] );
+    };
+    var onFailure = function(e)
     {
-      var index = partition( left, right );
+      promise.$failure( [e] );
+    };
 
-      if (left &lt; index - 1) 
-      {
-        qsort( left, index - 1 );
-      }
-
-      if (index &lt; right) 
-      {
-        qsort( index, right );
-      }
-    }
-
-    var right = this.size() - 1;
-
-    // Are there elements to sort?
-    if ( right > 0 )
-    {
-      qsort( 0, right );
-
-      this.rebuildIndex();
-    }
-
-    return this;
-  },
-
-  /**
-   * Rebuilds the index based on the keys.
-   * 
-   * @return {Stork.FastMap} 
-   *         The reference to this map.
-   */
-  rebuildIndex: function()
-  {
-    this.indices = {};
-
-    for (var i = 0; i &lt;= right; i++)
-    {
-      this.indices[ this.keys[ i ] ] = i;
-    }
-
-    return this;
+    this.all( onSuccess, onFailure );
   }
 
-};</code></pre>
+  /**
+   * The format of success callback for {@link Stork#select}.
+   * 
+   * @callback Stork~selectSuccess
+   * @param {Array} values
+   *        If columns is a string this is an array of values pulled from the
+   *        same property on all values that are objects. If columns is an array
+   *        this is an array of objects containing the properties that exist
+   *        in the columns array.
+   * @param {Array} keys
+   *        An array of the keys for pointing to the original values.
+   */
+
+  /**
+   * The format of failure callback for {@link Stork#select}.
+   * 
+   * @callback Stork~selectFailure
+   * @param {String|Array} columns
+   *        The property you wanted to return or an array of properties to return.
+   * @param {Any} error 
+   *        The error that was thrown.
+   */
+  
+  /**
+   * Returns column values (if columns is a string) or an array of objects of 
+   * column values (if columns is an array) to the callback.
+   *
+   * This is part of the query plugin.
+   *
+   * *Usage*
+   * ```javascript
+   * var onSuccessFunc = function(values, keys) {
+   *   // handle success
+   * };
+   * var onFailureFunc = function(columns, error) {
+   *   // uh oh!
+   * };
+   * db.select( 'name', onSucessFunc, onFailureFunc ); // listen for success/failure
+   * db.select( ['name', 'id'] ).then( onSuccessFunc, onFailureFunc ); // listen to promise
+   * ```
+   *
+   * @memberOf Stork#
+   * @param  {String|Array} columns
+   *         The property you want to return or an array of properties to return.
+   * @param  {Stork~selectSuccess} [success]
+   *         The function to invoke with the selected properties.
+   * @param  {Stork~selectFailure} [failure]
+   *         The function to invoke if there was a problem selecting the columns.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function select(columns, promise)
+  {
+    var onSuccess = function(values, keys)
+    {
+      var results = [];
+      var resultKeys = [];
+
+      for (var i = 0; i &lt; values.length; i++)
+      {
+        var v = values[ i ];
+
+        if ( isObject( v ) )
+        {
+          if ( isString( columns ) )
+          {
+            if ( columns in v )
+            {
+              results.push( v[ columns ] );
+              resultKeys.push( keys[ i ] );
+            }
+          }
+          else if ( isArray( columns ) )
+          {
+            var resultObject = {};
+            var resultColumns = 0;
+
+            for (var k = 0; k &lt; columns.length; k++)
+            {
+              var c = columns[ k ];
+
+              if ( c in v )
+              {
+                resultObject[ c ] = v[ c ];
+                resultColumns++;
+              }
+            }
+
+            if ( resultColumns > 0 )
+            {
+              results.push( resultObject );
+              resultKeys.push( keys[ i ] );
+            }
+          }
+        }
+      }
+
+      promise.$success( [results, resultKeys] );
+    };
+    var onFailure = function(e)
+    {
+      promise.$failure( [columns, e] );
+    };
+
+    this.all( onSuccess, onFailure );
+  }
+
+  /**
+   * The format of the comparater for {@link Stork#sort}.
+   *
+   * @callback Stork~sortComparator
+   * @param {Any} a
+   *        The first value to compare.
+   * @param {Any} b
+   *        The second value to compare.
+   * @return {Number} -
+   *         A negative number if `a &lt; b`, a positive number of `a > b` and 0
+   *         if `a == b`.
+   */
+
+  /**
+   * The format of success callback for {@link Stork#sort}.
+   * 
+   * @callback Stork~sortSuccess
+   * @param {Array} values
+   *        The array of sorted values.
+   * @param {Array} keys
+   *        The array of sorted keys.
+   */
+
+  /**
+   * The format of failure callback for {@link Stork#sort}.
+   * 
+   * @callback Stork~sortFailure
+   * @param {Any} error 
+   *        The error that was thrown.
+   */
+  
+  /**
+   * Sorts all key-value pairs and returns them to the callback. Next time the
+   * key-value pairs are iterated over they will be returned in the same order.
+   * The underlying structure should be considered unsorted anytime key-value
+   * pairs are updated, added, or removed.
+   *
+   * This is part of the query plugin.
+   *
+   * *Usage*
+   * ```javascript
+   * var compareFunc = function(a, b) {
+   *   // compare a &amp; b and return a number
+   * };
+   * var onSuccessFunc = function(values, keys) {
+   *   // handle success
+   * };
+   * var onFailureFunc = function(error) {
+   *   // uh oh!
+   * };
+   * db.sort( compareFunc, false, onSucessFunc, onFailureFunc ); // listen for success/failure
+   * db.sort( compareFunc ).then( onSuccessFunc, onFailureFunc ); // listen to promise
+   * ```
+   *
+   * @memberOf Stork#
+   * @param  {Stork~sortComparator} comparator
+   *         The function used to compare two values.
+   * @param  {Boolean} desc
+   *         If the key-value pairs should be in descending (reversed) order.
+   * @param  {Stork~sortSuccess} [success]
+   *         The function to invoke with the sorted values &amp; keys.
+   * @param  {Stork~sortFailure} [failure]
+   *         The function to invoke if there was a problem sorting the pairs.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function sort(comparator, desc, promise)
+  {
+    var onSuccess = function()
+    {
+      var cache = this.cache;
+
+      cache.sort( comparator );
+
+      if ( desc )
+      {
+        cache.reverse();
+      }
+
+      promise.$success( [cache.values, cache.okeys] );
+    };
+    var onFailure = function(e)
+    {
+      promise.$failure( [e] );
+    };
+
+    this.all( onSuccess, onFailure );
+  }
+
+  var METHODS = 
+  {
+    where:  $promise( 'where', where ),
+    select: $promise( 'select', select ),
+    sort:   $promise( 'sort', sort )
+  }; 
+
+  return function(stork)
+  {
+    copy( METHODS, stork );
+  };
+
+})());
+
+
+  </code></pre>
         </article>
     </section>
 
@@ -617,7 +638,7 @@ FastMap.prototype =
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Mon Oct 19 2015 21:10:15 GMT-0400 (EDT)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Mon Oct 19 2015 22:48:14 GMT-0400 (EDT)
         </footer>
     </div>
 </div>

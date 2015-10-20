@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Source: FastMap.js</title>
+    <title>Source: plugins/aggregation.js</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -70,6 +70,14 @@
             
             <span class="subtitle">Typedefs</span>
             
+                <li data-name="Stork~aggregateAccumulate"><a href="Stork.html#~aggregateAccumulate">aggregateAccumulate</a></li>
+            
+                <li data-name="Stork~aggregateFailure"><a href="Stork.html#~aggregateFailure">aggregateFailure</a></li>
+            
+                <li data-name="Stork~aggregateResult"><a href="Stork.html#~aggregateResult">aggregateResult</a></li>
+            
+                <li data-name="Stork~aggregateSuccess"><a href="Stork.html#~aggregateSuccess">aggregateSuccess</a></li>
+            
                 <li data-name="Stork~allFailure"><a href="Stork.html#~allFailure">allFailure</a></li>
             
                 <li data-name="Stork~allSuccess"><a href="Stork.html#~allSuccess">allSuccess</a></li>
@@ -120,9 +128,25 @@
             
                 <li data-name="Stork~saveSuccess"><a href="Stork.html#~saveSuccess">saveSuccess</a></li>
             
+                <li data-name="Stork~selectFailure"><a href="Stork.html#~selectFailure">selectFailure</a></li>
+            
+                <li data-name="Stork~selectSuccess"><a href="Stork.html#~selectSuccess">selectSuccess</a></li>
+            
                 <li data-name="Stork~sizeFailure"><a href="Stork.html#~sizeFailure">sizeFailure</a></li>
             
                 <li data-name="Stork~sizeSuccess"><a href="Stork.html#~sizeSuccess">sizeSuccess</a></li>
+            
+                <li data-name="Stork~sortComparator"><a href="Stork.html#~sortComparator">sortComparator</a></li>
+            
+                <li data-name="Stork~sortFailure"><a href="Stork.html#~sortFailure">sortFailure</a></li>
+            
+                <li data-name="Stork~sortSuccess"><a href="Stork.html#~sortSuccess">sortSuccess</a></li>
+            
+                <li data-name="Stork~where"><a href="Stork.html#~where">where</a></li>
+            
+                <li data-name="Stork~whereFailure"><a href="Stork.html#~whereFailure">whereFailure</a></li>
+            
+                <li data-name="Stork~whereSuccess"><a href="Stork.html#~whereSuccess">whereSuccess</a></li>
             
             </ul>
             <ul class="methods itemMembers">
@@ -133,9 +157,15 @@
             
                 <li data-name="Stork.plugin"><a href="Stork.html#.plugin">plugin</a></li>
             
+                <li data-name="Stork#aggregate"><a href="Stork.html#aggregate">aggregate</a></li>
+            
                 <li data-name="Stork#all"><a href="Stork.html#all">all</a></li>
             
+                <li data-name="Stork#avg"><a href="Stork.html#avg">avg</a></li>
+            
                 <li data-name="Stork#batch"><a href="Stork.html#batch">batch</a></li>
+            
+                <li data-name="Stork#count"><a href="Stork.html#count">count</a></li>
             
                 <li data-name="Stork#destroy"><a href="Stork.html#destroy">destroy</a></li>
             
@@ -147,6 +177,10 @@
             
                 <li data-name="Stork#init"><a href="Stork.html#init">init</a></li>
             
+                <li data-name="Stork#max"><a href="Stork.html#max">max</a></li>
+            
+                <li data-name="Stork#min"><a href="Stork.html#min">min</a></li>
+            
                 <li data-name="Stork#put"><a href="Stork.html#put">put</a></li>
             
                 <li data-name="Stork#reload"><a href="Stork.html#reload">reload</a></li>
@@ -157,11 +191,19 @@
             
                 <li data-name="Stork#save"><a href="Stork.html#save">save</a></li>
             
+                <li data-name="Stork#select"><a href="Stork.html#select">select</a></li>
+            
                 <li data-name="Stork#size"><a href="Stork.html#size">size</a></li>
+            
+                <li data-name="Stork#sort"><a href="Stork.html#sort">sort</a></li>
+            
+                <li data-name="Stork#sum"><a href="Stork.html#sum">sum</a></li>
             
                 <li data-name="Stork#then"><a href="Stork.html#then">then</a></li>
             
                 <li data-name="Stork#valid"><a href="Stork.html#valid">valid</a></li>
+            
+                <li data-name="Stork#where"><a href="Stork.html#where">where</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -270,342 +312,330 @@
     </ul>
 </div>
     <div class="main">
-        <h1 class="page-title" data-filename="FastMap.js.html">Source: FastMap.js</h1>
+        <h1 class="page-title" data-filename="plugins_aggregation.js.html">Source: plugins/aggregation.js</h1>
         
 
 
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-/**
- * A FastMap has the key-to-value benefits of a map and iteration benefits of an
- * array. This is especially beneficial when most of the time the contents of 
- * the structure need to be iterated and order doesn't matter (since removal 
- * performs a swap which breaks insertion order).
- *
- * @constructor
- * @memberOf Stork
- * @param {Stork.FastMap|object} [map]
- */
-function FastMap(map)
-{
-  this.reset();
-  this.putMap( map );
-}
-
-FastMap.prototype =
+            <pre class="prettyprint source linenums"><code>Stork.plugin((function()
 {
 
   /**
-   * Resets the map by initializing the values, keys, and indexes.
+   * The format of success callback for aggregation functions.
    * 
-   * @return {Stork.FastMap}
+   * @callback Stork~aggregateSuccess
+   * @param {Number} aggregatedValue
+   *        The result of the aggregation function.
    */
-  reset: function()
-  {
-    /**
-     * An array of the values in this map.
-     * @member {Array}
-     */
-    this.values = [];
-
-    /**
-     * An array of the keys in this map.
-     * @type {Array}
-     */
-    this.keys = [];
-
-    /**
-     * An array of the original keys in this map.
-     * @type {Array}
-     */
-    this.okeys = [];
-
-    /**
-     * An object of key to index mappings.
-     * @type {Object}
-     */
-    this.indices = {};
-
-    return this;
-  },
 
   /**
-   * Puts the value in the map by the given key.
-   *
-   * @param {String} key
-   * @param {V} value
-   * @param {K} originalKey
-   * @return {Stork.FastMap}
-   */
-  put: function(key, value, originalKey)
-  {
-    if ( key in this.indices )
-    {
-      this.values[ this.indices[ key ] ] = value;
-    }
-    else
-    {
-      this.indices[ key ] = this.values.length;
-      this.values.push( value );
-      this.keys.push( key );
-      this.okeys.push( originalKey );
-    }
-
-    return this;
-  },
-
-  /**
-   * Puts all keys &amp; values on the given map into this map overwriting any existing values mapped by similar keys.
-   *
-   * @param {FastMap|Object} map
-   * @return {Stork.FastMap}
-   */
-  putMap: function(map)
-  {
-    if (map instanceof FastMap)
-    {
-      var keys = map.keys;
-      var values = map.values;
-      var okeys = map.okeys;
-
-      for (var i = 0; i &lt; keys.length; i++)
-      {
-        this.put( keys[ i ], values[ i ], okeys[ i ] );
-      }
-    }
-    else if ( isObject( map ) )
-    {
-      for (var key in map)
-      {
-        this.put( key, map[ key ], key );
-      }
-    }
-
-    return this;
-  },
-
-  /**
-   * Returns the value mapped by the given key.
-   *
-   * @param {String} key
-   * @return {V}
-   */
-  get: function(key)
-  {
-    return this.values[ this.indices[ key ] ];
-  },
-
-  /**
-   * Removes the value by a given key
-   *
-   * @param {String} key
-   * @return {Stork.FastMap}
-   */
-  remove: function(key)
-  {
-    var index = this.indices[ key ];
-
-    if ( isNumber( index ) )
-    {
-      this.removeAt( index );
-    }
-
-    return this;
-  },
-
-  /**
-   * Removes the value &amp; key at the given index.
-   *
-   * @param {Number} index
-   * @return {Stork.FastMap}
-   */
-  removeAt: function(index)
-  {
-    var key = this.keys[ index ];
-    var lastValue = this.values.pop();
-    var lastKey = this.keys.pop();
-    var lastOkey = this.okeys.pop();
-
-    if ( index &lt; this.values.length )
-    {
-      this.values[ index ] = lastValue;
-      this.keys[ index ] = lastKey;
-      this.okeys[ index ] = lastOkey; 
-      this.indices[ lastKey ] = index;
-    }
-
-    delete this.indices[ key ];
-
-    return this;
-  },
-
-  /**
-   * Returns the index of the value in the array given a key.
-   *
-   * @param {String} key
-   * @return {Number}
-   */
-  indexOf: function(key)
-  {
-    return coalesce( this.indices[ key ], -1 );
-  },
-
-  /**
-   * Returns whether this map has a value for the given key.
-   *
-   * @param {String} key
-   * @return {Boolean}
-   */
-  has: function(key)
-  {
-    return key in this.indices;
-  },
-
-  /**
-   * Returns whether the given input has overlap with keys in this map.
-   *
-   * @param {FastMap|Object} map
-   * @return {Boolean}
-   */
-  hasOverlap: function(map)
-  {
-    var keys = this.keys;
-    var indices = map.indices;
-
-    for (var i = 0; i &lt; keys.length; i++)
-    {
-      if ( keys[i] in indices )
-      {
-        return true;
-      }
-    }
-   
-    return false;
-  },
-
-  /**
-   * Returns the number of elements in the map.
-   *
-   * @return {Number}
-   */
-  size: function()
-  {
-    return this.values.length;
-  },
-
-  /**
-   * Reverses the order of the underlying values &amp; keys.
+   * The format of failure callback for aggregation functions.
    * 
-   * @return {Stork.FastMap}
-   *         The referense to this map.
+   * @callback Stork~aggregateFailure
+   * @param {Any} error 
+   *        The error that was thrown.
    */
-  reverse: function()
-  {
-    var max = this.size() - 1;
-    var half = Math.ceil( max / 2 );
-
-    for (var i = 0; i &lt; half; i++)
-    {
-      swap( this.values, i, max - i );
-      swap( this.keys, i, max - i );
-      swap( this.okeys, i, max - i );
-    }
-
-    this.rebuildIndex();
-
-    return this;
-  },
+  
+  /**
+   * The format of an accumulation callback for aggregation functions.
+   *
+   * @callback Stork~aggregateAccumulate
+   * @param {Any} value
+   *        The value to process for accumulation.
+   */
+  
+  /**
+   * The format of an accumulation callback for aggregation functions.
+   *
+   * @callback Stork~aggregateResult
+   * @return {Any}
+   *         The result of the accumulated values.
+   */
 
   /**
-   * Sorts the underlying values &amp; keys given a value compare function.
+   * Performs an aggregation on key-value pairs where the value is an `Object` 
+   * which may have a specific property to aggregate. The result of the 
+   * aggregation is returned to the callback.
+   *
+   * This is part of the aggregation plugin.
    * 
-   * @param  {function} comparator
-   *         A function which accepts two values and returns a number used for
-   *         sorting. If the first argument is less than the second argument, a
-   *         negative number should be returned. If the arguments are equivalent
-   *         then 0 should be returned, otherwise a positive number should be
-   *         returned.
-   * @return {Stork.FastMap}
-   *         The reference to this map.
+   * @memberOf Stork#
+   * @param  {String} property
+   *         The property on the object to pass to the accumulation function.
+   * @param  {Stork~aggregateAccumulate} accumulate
+   *         The function to invoke with the value of the property.
+   * @param  {Stork~aggregateResult} getResult
+   *         The function to call at the end to returned the aggregated value.
+   * @param  {Stork~aggregateSuccess} [success]
+   *         The function to invoke when a value is successfully aggregated.
+   * @param  {Stork~aggregateSuccess} [failure]
+   *         The function to invoke if there's a problem.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
    */
-  sort: function(comparator)
+  function aggregate(property, accumulate, getResult, promise)
   {
-    var map = this;
-
-    // Sort this partition!
-    function partition(left, right)
+    var onSuccess = function(values, keys)
     {
-      var pivot = map.values[ Math.floor((right + left) / 2) ];
-      var i = left;
-      var j = right;
+      var returnedValue = undefined;
 
-      while (i &lt;= j) 
+      for (var i = 0; i &lt; values.length; i++)
       {
-        while (comparator( map.values[i], pivot ) &lt; 0) i++
-        while (comparator( map.values[j], pivot ) > 0) j--;
+        var v = values[ i ];
 
-        if (i &lt;= j) {
-          swap( map.values, i, j );
-          swap( map.keys, i, j );
-          swap( map.okeys, i, j );
-          i++;
-          j--;
+        if (isObject( v ) &amp;&amp; property in v)
+        {
+          accumulate( v[ property ] );
         }
       }
 
-      return i;
-    }
-
-    // Quicksort
-    function qsort(left, right)
+      promise.$success( [ getResult() ] )
+    };
+    var onFailure = function(e)
     {
-      var index = partition( left, right );
+      promise.$failure( [e] );
+    };
 
-      if (left &lt; index - 1) 
-      {
-        qsort( left, index - 1 );
-      }
-
-      if (index &lt; right) 
-      {
-        qsort( index, right );
-      }
-    }
-
-    var right = this.size() - 1;
-
-    // Are there elements to sort?
-    if ( right > 0 )
-    {
-      qsort( 0, right );
-
-      this.rebuildIndex();
-    }
-
-    return this;
-  },
-
-  /**
-   * Rebuilds the index based on the keys.
-   * 
-   * @return {Stork.FastMap} 
-   *         The reference to this map.
-   */
-  rebuildIndex: function()
-  {
-    this.indices = {};
-
-    for (var i = 0; i &lt;= right; i++)
-    {
-      this.indices[ this.keys[ i ] ] = i;
-    }
-
-    return this;
+    this.all( onSuccess, onFailure );
   }
 
-};</code></pre>
+  /**
+   * Returns the number of values that are objects and have the specified 
+   * property to the callback.
+   *
+   * This is part of the aggregation plugin.
+   *
+   * *Usage*
+   * ```javascript
+   * db.count('name', function(count) {
+   *   // count = the number of objects with the property 'name'
+   * });
+   * ```
+   * 
+   * @memberOf Stork#
+   * @param  {String} property
+   *         The property on the object to look for.
+   * @param  {Stork~aggregateSuccess} [success]
+   *         The function to invoke with the number of values with the property.
+   * @param  {Stork~aggregateSuccess} [failure]
+   *         The function to invoke if there's a problem.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function count(property, promise)
+  {
+    var total = 0;
+
+    var accumulate = function(v)
+    {
+      total++;
+    };
+    var getResult = function()
+    {
+      return total;
+    };
+
+    aggregate( property, accumulate, getResult, promise );
+  }
+
+  /**
+   * Returns the sum of a set of values taken from a property on all `Object` 
+   * values to the callback.
+   *
+   * This is part of the aggregation plugin.
+   * 
+   * *Usage*
+   * ```javascript
+   * db.sum('kills', function(sum) {
+   *   // sum = total of all kills
+   * });
+   * ```
+   * 
+   * @memberOf Stork#
+   * @param  {String} property
+   *         The property on the object to sum.
+   * @param  {Stork~aggregateSuccess} [success]
+   *         The function to invoke with the sum.
+   * @param  {Stork~aggregateSuccess} [failure]
+   *         The function to invoke if there's a problem.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function sum(property, promise)
+  {
+    var summing = 0;
+
+    var accumulate = function(v)
+    {
+      if (isNumber(v))
+      {
+        summing += v;
+      }
+    };
+    var getResult = function()
+    {
+      return summing;
+    };
+
+    aggregate( property, accumulate, getResult, promise );
+  }
+
+
+  /**
+   * Returns the average of a set of values taken from a property on all `Object` 
+   * values to the callback.
+   *
+   * This is part of the aggregation plugin.
+   * 
+   * *Usage*
+   * ```javascript
+   * db.avg('age', function(avg) {
+   *   // avg = the average age
+   * });
+   * ```
+   * 
+   * @memberOf Stork#
+   * @param  {String} property
+   *         The property on the object to average.
+   * @param  {Stork~aggregateSuccess} [success]
+   *         The function to invoke with the average.
+   * @param  {Stork~aggregateSuccess} [failure]
+   *         The function to invoke if there's a problem.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function avg(property, promise)
+  {
+    var summing = 0;
+    var total = 0;
+
+    var accumulate = function(v)
+    {
+      if (isNumber(v))
+      {
+        summing += v;
+        total++;
+      }
+    };
+    var getResult = function()
+    {
+      return summing / total;
+    };
+
+    aggregate( property, accumulate, getResult, promise );
+  }
+
+  /**
+   * Returns the minimum value of a set of values taken from a property on all 
+   * `Object` values to the callback.
+   *
+   * This is part of the aggregation plugin.
+   * 
+   * *Usage*
+   * ```javascript
+   * db.min('age', function(min) {
+   *   // min = the minimum age
+   * });
+   * ```
+   * 
+   * @memberOf Stork#
+   * @param  {String} property
+   *         The property on the object to find the minimum value of.
+   * @param  {Stork~aggregateSuccess} [success]
+   *         The function to invoke with the minimum value.
+   * @param  {Stork~aggregateSuccess} [failure]
+   *         The function to invoke if there's a problem.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function min(property, promise)
+  {
+    var minValue = Number.MAX_VALUE;
+
+    var accumulate = function(v)
+    {
+      if (isNumber(v))
+      {
+        minValue = Math.min( minValue, v );
+      }
+    };
+    var getResult = function()
+    {
+      return minValue;
+    };
+
+    aggregate( property, accumulate, getResult, promise );
+  }
+
+  /**
+   * Returns the maximum value of a set of values taken from a property on all 
+   * `Object` values to the callback.
+   *
+   * This is part of the aggregation plugin.
+   * 
+   * *Usage*
+   * ```javascript
+   * db.max('age', function(max) {
+   *   // max = the maximum age
+   * });
+   * ```
+   * 
+   * @memberOf Stork#
+   * @param  {String} property
+   *         The property on the object to find the maximum value of.
+   * @param  {Stork~aggregateSuccess} [success]
+   *         The function to invoke with the maximum value.
+   * @param  {Stork~aggregateSuccess} [failure]
+   *         The function to invoke if there's a problem.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  function max(property, promise)
+  {
+    var maxValue = Number.MAX_VALUE;
+
+    var accumulate = function(v)
+    {
+      if (isNumber(v))
+      {
+        maxValue = Math.min( maxValue, v );
+      }
+    };
+    var getResult = function()
+    {
+      return maxValue;
+    };
+
+    aggregate( property, accumulate, getResult, promise );
+  }
+
+  var METHODS = 
+  {
+    aggregate:  $promise( 'aggregate', aggregate ),
+    count:      $promise( 'count', count ),
+    sum:        $promise( 'sum', sum ),
+    avg:        $promise( 'avg', avg ),
+    min:        $promise( 'min', min ),
+    max:        $promise( 'max', max )
+  }; 
+
+  return function(stork)
+  {
+    copy( METHODS, stork );
+  };
+
+})());
+
+
+  </code></pre>
         </article>
     </section>
 
@@ -617,7 +647,7 @@ FastMap.prototype =
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Mon Oct 19 2015 21:10:15 GMT-0400 (EDT)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Mon Oct 19 2015 22:48:14 GMT-0400 (EDT)
         </footer>
     </div>
 </div>

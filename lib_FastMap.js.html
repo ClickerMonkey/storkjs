@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Source: FastMap.js</title>
+    <title>Source: lib/FastMap.js</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -70,6 +70,14 @@
             
             <span class="subtitle">Typedefs</span>
             
+                <li data-name="Stork~aggregateAccumulate"><a href="Stork.html#~aggregateAccumulate">aggregateAccumulate</a></li>
+            
+                <li data-name="Stork~aggregateFailure"><a href="Stork.html#~aggregateFailure">aggregateFailure</a></li>
+            
+                <li data-name="Stork~aggregateResult"><a href="Stork.html#~aggregateResult">aggregateResult</a></li>
+            
+                <li data-name="Stork~aggregateSuccess"><a href="Stork.html#~aggregateSuccess">aggregateSuccess</a></li>
+            
                 <li data-name="Stork~allFailure"><a href="Stork.html#~allFailure">allFailure</a></li>
             
                 <li data-name="Stork~allSuccess"><a href="Stork.html#~allSuccess">allSuccess</a></li>
@@ -120,9 +128,25 @@
             
                 <li data-name="Stork~saveSuccess"><a href="Stork.html#~saveSuccess">saveSuccess</a></li>
             
+                <li data-name="Stork~selectFailure"><a href="Stork.html#~selectFailure">selectFailure</a></li>
+            
+                <li data-name="Stork~selectSuccess"><a href="Stork.html#~selectSuccess">selectSuccess</a></li>
+            
                 <li data-name="Stork~sizeFailure"><a href="Stork.html#~sizeFailure">sizeFailure</a></li>
             
                 <li data-name="Stork~sizeSuccess"><a href="Stork.html#~sizeSuccess">sizeSuccess</a></li>
+            
+                <li data-name="Stork~sortComparator"><a href="Stork.html#~sortComparator">sortComparator</a></li>
+            
+                <li data-name="Stork~sortFailure"><a href="Stork.html#~sortFailure">sortFailure</a></li>
+            
+                <li data-name="Stork~sortSuccess"><a href="Stork.html#~sortSuccess">sortSuccess</a></li>
+            
+                <li data-name="Stork~where"><a href="Stork.html#~where">where</a></li>
+            
+                <li data-name="Stork~whereFailure"><a href="Stork.html#~whereFailure">whereFailure</a></li>
+            
+                <li data-name="Stork~whereSuccess"><a href="Stork.html#~whereSuccess">whereSuccess</a></li>
             
             </ul>
             <ul class="methods itemMembers">
@@ -133,9 +157,15 @@
             
                 <li data-name="Stork.plugin"><a href="Stork.html#.plugin">plugin</a></li>
             
+                <li data-name="Stork#aggregate"><a href="Stork.html#aggregate">aggregate</a></li>
+            
                 <li data-name="Stork#all"><a href="Stork.html#all">all</a></li>
             
+                <li data-name="Stork#avg"><a href="Stork.html#avg">avg</a></li>
+            
                 <li data-name="Stork#batch"><a href="Stork.html#batch">batch</a></li>
+            
+                <li data-name="Stork#count"><a href="Stork.html#count">count</a></li>
             
                 <li data-name="Stork#destroy"><a href="Stork.html#destroy">destroy</a></li>
             
@@ -147,6 +177,10 @@
             
                 <li data-name="Stork#init"><a href="Stork.html#init">init</a></li>
             
+                <li data-name="Stork#max"><a href="Stork.html#max">max</a></li>
+            
+                <li data-name="Stork#min"><a href="Stork.html#min">min</a></li>
+            
                 <li data-name="Stork#put"><a href="Stork.html#put">put</a></li>
             
                 <li data-name="Stork#reload"><a href="Stork.html#reload">reload</a></li>
@@ -157,11 +191,19 @@
             
                 <li data-name="Stork#save"><a href="Stork.html#save">save</a></li>
             
+                <li data-name="Stork#select"><a href="Stork.html#select">select</a></li>
+            
                 <li data-name="Stork#size"><a href="Stork.html#size">size</a></li>
+            
+                <li data-name="Stork#sort"><a href="Stork.html#sort">sort</a></li>
+            
+                <li data-name="Stork#sum"><a href="Stork.html#sum">sum</a></li>
             
                 <li data-name="Stork#then"><a href="Stork.html#then">then</a></li>
             
                 <li data-name="Stork#valid"><a href="Stork.html#valid">valid</a></li>
+            
+                <li data-name="Stork#where"><a href="Stork.html#where">where</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -270,7 +312,7 @@
     </ul>
 </div>
     <div class="main">
-        <h1 class="page-title" data-filename="FastMap.js.html">Source: FastMap.js</h1>
+        <h1 class="page-title" data-filename="lib_FastMap.js.html">Source: lib/FastMap.js</h1>
         
 
 
@@ -498,7 +540,7 @@ FastMap.prototype =
   /**
    * Reverses the order of the underlying values &amp; keys.
    * 
-   * @return {Stork.FastMap}
+   * @return {Stork.FastMap} -
    *         The referense to this map.
    */
   reverse: function()
@@ -527,7 +569,7 @@ FastMap.prototype =
    *         negative number should be returned. If the arguments are equivalent
    *         then 0 should be returned, otherwise a positive number should be
    *         returned.
-   * @return {Stork.FastMap}
+   * @return {Stork.FastMap} -
    *         The reference to this map.
    */
   sort: function(comparator)
@@ -590,7 +632,7 @@ FastMap.prototype =
   /**
    * Rebuilds the index based on the keys.
    * 
-   * @return {Stork.FastMap} 
+   * @return {Stork.FastMap} -
    *         The reference to this map.
    */
   rebuildIndex: function()
@@ -617,7 +659,7 @@ FastMap.prototype =
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Mon Oct 19 2015 21:10:15 GMT-0400 (EDT)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Mon Oct 19 2015 22:48:14 GMT-0400 (EDT)
         </footer>
     </div>
 </div>
