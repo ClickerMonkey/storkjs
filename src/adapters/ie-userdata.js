@@ -50,7 +50,7 @@ Stork.adapter('ie-userdata', 1.5,
 
         cache.put( rawKey, value, key ); 
       }
-      catch (e)
+      catch (e) 
       {
         // ignore
       }

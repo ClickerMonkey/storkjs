@@ -98,6 +98,8 @@ Stork.adapter('chrome-storage-local', 4, function()
 
     _get: function(key, rawKey, promise)
     {
+      var stork = this;
+
       store.get( rawKey, function(items)
       {
         if ( isError() )
@@ -109,6 +111,8 @@ Stork.adapter('chrome-storage-local', 4, function()
           if ( items.length )
           {
             var value = fromJson( items[0] );
+
+            stork.cache.put( rawKey, value, key );
 
             promise.$success( [value, key] );
           }

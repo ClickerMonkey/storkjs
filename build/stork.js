@@ -2839,6 +2839,8 @@ Stork.adapter('chrome-storage-local', 4, function()
 
     _get: function(key, rawKey, promise)
     {
+      var stork = this;
+
       store.get( rawKey, function(items)
       {
         if ( isError() )
@@ -2850,6 +2852,8 @@ Stork.adapter('chrome-storage-local', 4, function()
           if ( items.length )
           {
             var value = fromJson( items[0] );
+
+            stork.cache.put( rawKey, value, key );
 
             promise.$success( [value, key] );
           }
@@ -3006,7 +3010,7 @@ Stork.adapter('ie-userdata', 1.5,
 
         cache.put( rawKey, value, key ); 
       }
-      catch (e)
+      catch (e) 
       {
         // ignore
       }
@@ -3235,7 +3239,7 @@ Stork.adapter('indexed-db', 5, function()
         {
           var value = request.result;
 
-          stork.cache.put( rawKey, value );
+          stork.cache.put( rawKey, value, key );
 
           promise.$success( [value, key] );          
         }
@@ -3256,7 +3260,7 @@ Stork.adapter('indexed-db', 5, function()
       {
         var previousValue = stork.cache.get( rawKey );
 
-        stork.cache.put( rawKey, value );
+        stork.cache.put( rawKey, value, key );
 
         promise.$success( [key, value, previousValue] );
       }; 
@@ -3305,6 +3309,8 @@ Stork.adapter('indexed-db', 5, function()
         promise.$failure( [request.error] );
       };
     }
+
+    // TODO getMany, removeMany
 
   };
 
@@ -3470,6 +3476,8 @@ Stork.adapter('local-storage', 3, function()
         else
         {
           var value = fromJson( rawValue );
+
+          this.cache.put( rawKey, value, key );
 
           promise.$success( [value, key] ); 
         }
@@ -3792,7 +3800,7 @@ Stork.adapter('webkit-sqlite', 6, function()
       {
         var previousValue = stork.cache.get( rawKey );
 
-        stork.cache.put( rawKey, value );
+        stork.cache.put( rawKey, value, key );
 
         promise.$success( [key, value, previousValue] );
       };
@@ -4013,7 +4021,11 @@ Stork.adapter('webkit-sqlite', 6, function()
           {
             if ( rawKeys[ k ] === r.id )
             {
-              values[ keyToValueIndex[ k ] ] = fromJson( r.value );
+              var value = fromJson( r.value );
+              var index = keyToValueIndex[ k ];
+
+              values[ index ] = value;
+              stork.cache.put( r.id, value, keys[ index ] );
             }
           }
         }

@@ -160,6 +160,8 @@ Stork.adapter('local-storage', 3, function()
         {
           var value = fromJson( rawValue );
 
+          this.cache.put( rawKey, value, key );
+
           promise.$success( [value, key] ); 
         }
       }

@@ -140,7 +140,7 @@ Stork.adapter('indexed-db', 5, function()
         {
           var value = request.result;
 
-          stork.cache.put( rawKey, value );
+          stork.cache.put( rawKey, value, key );
 
           promise.$success( [value, key] );          
         }
@@ -161,7 +161,7 @@ Stork.adapter('indexed-db', 5, function()
       {
         var previousValue = stork.cache.get( rawKey );
 
-        stork.cache.put( rawKey, value );
+        stork.cache.put( rawKey, value, key );
 
         promise.$success( [key, value, previousValue] );
       }; 
@@ -210,6 +210,8 @@ Stork.adapter('indexed-db', 5, function()
         promise.$failure( [request.error] );
       };
     }
+
+    // TODO getMany, removeMany
 
   };
 

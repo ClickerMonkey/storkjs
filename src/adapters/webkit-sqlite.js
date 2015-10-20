@@ -203,7 +203,7 @@ Stork.adapter('webkit-sqlite', 6, function()
       {
         var previousValue = stork.cache.get( rawKey );
 
-        stork.cache.put( rawKey, value );
+        stork.cache.put( rawKey, value, key );
 
         promise.$success( [key, value, previousValue] );
       };
@@ -424,7 +424,11 @@ Stork.adapter('webkit-sqlite', 6, function()
           {
             if ( rawKeys[ k ] === r.id )
             {
-              values[ keyToValueIndex[ k ] ] = fromJson( r.value );
+              var value = fromJson( r.value );
+              var index = keyToValueIndex[ k ];
+
+              values[ index ] = value;
+              stork.cache.put( r.id, value, keys[ index ] );
             }
           }
         }
