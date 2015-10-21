@@ -56,7 +56,7 @@ Stork.adapter('ie-userdata', 1.5,
       }
     }
 
-    this.cache = cache;
+    this.cache.overwrite( cache );
     this.loaded = true;
     this.finishReload( promise );
 

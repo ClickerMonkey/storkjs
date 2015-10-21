@@ -11,7 +11,31 @@
  */
 function FastMap(map)
 {
-  this.reset();
+  /**
+   * An array of the values in this map.
+   * @member {Array}
+   */
+  this.values = [];
+
+  /**
+   * An array of the keys in this map.
+   * @type {Array}
+   */
+  this.keys = [];
+
+  /**
+   * An array of the original keys in this map.
+   * @type {Array}
+   */
+  this.okeys = [];
+
+  /**
+   * An object of key to index mappings.
+   * @type {Object}
+   */
+  this.indices = {};
+
+  // If another map is given to populate this map, do it!
   this.putMap( map );
 }
 
@@ -25,28 +49,9 @@ FastMap.prototype =
    */
   reset: function()
   {
-    /**
-     * An array of the values in this map.
-     * @member {Array}
-     */
-    this.values = [];
-
-    /**
-     * An array of the keys in this map.
-     * @type {Array}
-     */
-    this.keys = [];
-
-    /**
-     * An array of the original keys in this map.
-     * @type {Array}
-     */
-    this.okeys = [];
-
-    /**
-     * An object of key to index mappings.
-     * @type {Object}
-     */
+    this.values.length = 0;
+    this.keys.length = 0;
+    this.okeys.length = 0;
     this.indices = {};
 
     return this;
@@ -132,6 +137,23 @@ FastMap.prototype =
     {
       this.removeAt( index );
     }
+
+    return this;
+  },
+
+  /**
+   * Overwrites this map with another map.
+   * 
+   * @param  {Stork.FastMap} map
+   * @return {Stork.FastMap}
+   */
+  overwrite: function(map)
+  {
+    replaceArray( this.values, map.values );
+    replaceArray( this.keys, map.keys );
+    replaceArray( this.okeys, map.okeys );
+
+    this.rebuildIndex();
 
     return this;
   },
@@ -318,7 +340,7 @@ FastMap.prototype =
   {
     this.indices = {};
 
-    for (var i = 0; i <= right; i++)
+    for (var i = 0, l = this.keys.length; i < l; i++)
     {
       this.indices[ this.keys[ i ] ] = i;
     }

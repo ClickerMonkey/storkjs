@@ -80,7 +80,7 @@ Stork.adapter('window-name', 2, function()
           }  
         }
 
-        this.cache = cache;
+        this.cache.overwrite( cache );
         this.loaded = true;
       }
       catch (e)

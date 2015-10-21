@@ -37,6 +37,12 @@ function def(x)
   return typeof x !== 'undefined';
 }
 
+function replaceArray(dest, src)
+{
+  dest.length = 0;
+  dest.push.apply( dest, src );
+}
+
 function coalesce(a, b, c, d)
 {
   if (def(a)) return a;

@@ -85,7 +85,7 @@ Stork.adapter('chrome-storage-local', 4, function()
             }
           }
 
-          stork.cache = cache;
+          stork.cache.overwrite( cache );
           stork.loaded = true;
 
           stork.finishReload( promise );

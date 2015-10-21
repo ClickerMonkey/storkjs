@@ -278,7 +278,8 @@ Promise.prototype =
   },
 
   // Resets this promise removing all listeners
-  $reset: function() {
+  $reset: function() 
+  {
     this.state = Promise.PENDING;
     this.successes.length = 0;
     this.failures.length = 0;

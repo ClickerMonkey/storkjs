@@ -106,7 +106,7 @@ Stork.adapter('webkit-sqlite', 6, function()
             cache.put( record.id, value, key );
           }
 
-          stork.cache = cache;
+          stork.cache.overwrite( cache );
           stork.loaded = true;
         }
         catch (e) 

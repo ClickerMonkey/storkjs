@@ -44,6 +44,12 @@ function def(x)
   return typeof x !== 'undefined';
 }
 
+function replaceArray(dest, src)
+{
+  dest.length = 0;
+  dest.push.apply( dest, src );
+}
+
 function coalesce(a, b, c, d)
 {
   if (def(a)) return a;
@@ -1688,7 +1694,8 @@ Promise.prototype =
   },
 
   // Resets this promise removing all listeners
-  $reset: function() {
+  $reset: function() 
+  {
     this.state = Promise.PENDING;
     this.successes.length = 0;
     this.failures.length = 0;
@@ -1709,7 +1716,31 @@ Promise.prototype =
  */
 function FastMap(map)
 {
-  this.reset();
+  /**
+   * An array of the values in this map.
+   * @member {Array}
+   */
+  this.values = [];
+
+  /**
+   * An array of the keys in this map.
+   * @type {Array}
+   */
+  this.keys = [];
+
+  /**
+   * An array of the original keys in this map.
+   * @type {Array}
+   */
+  this.okeys = [];
+
+  /**
+   * An object of key to index mappings.
+   * @type {Object}
+   */
+  this.indices = {};
+
+  // If another map is given to populate this map, do it!
   this.putMap( map );
 }
 
@@ -1723,28 +1754,9 @@ FastMap.prototype =
    */
   reset: function()
   {
-    /**
-     * An array of the values in this map.
-     * @member {Array}
-     */
-    this.values = [];
-
-    /**
-     * An array of the keys in this map.
-     * @type {Array}
-     */
-    this.keys = [];
-
-    /**
-     * An array of the original keys in this map.
-     * @type {Array}
-     */
-    this.okeys = [];
-
-    /**
-     * An object of key to index mappings.
-     * @type {Object}
-     */
+    this.values.length = 0;
+    this.keys.length = 0;
+    this.okeys.length = 0;
     this.indices = {};
 
     return this;
@@ -1830,6 +1842,23 @@ FastMap.prototype =
     {
       this.removeAt( index );
     }
+
+    return this;
+  },
+
+  /**
+   * Overwrites this map with another map.
+   * 
+   * @param  {Stork.FastMap} map
+   * @return {Stork.FastMap}
+   */
+  overwrite: function(map)
+  {
+    replaceArray( this.values, map.values );
+    replaceArray( this.keys, map.keys );
+    replaceArray( this.okeys, map.okeys );
+
+    this.rebuildIndex();
 
     return this;
   },
@@ -2016,7 +2045,7 @@ FastMap.prototype =
   {
     this.indices = {};
 
-    for (var i = 0; i <= right; i++)
+    for (var i = 0, l = this.keys.length; i < l; i++)
     {
       this.indices[ this.keys[ i ] ] = i;
     }
@@ -2834,7 +2863,7 @@ Stork.adapter('chrome-storage-local', 4, function()
             }
           }
 
-          stork.cache = cache;
+          stork.cache.overwrite( cache );
           stork.loaded = true;
 
           stork.finishReload( promise );
@@ -3024,7 +3053,7 @@ Stork.adapter('ie-userdata', 1.5,
       }
     }
 
-    this.cache = cache;
+    this.cache.overwrite( cache );
     this.loaded = true;
     this.finishReload( promise );
 
@@ -3197,9 +3226,9 @@ Stork.adapter('indexed-db', 5, function()
         }
         else
         {
-          stork.cache = cache;
+          stork.cache.overwrite( cache );
           stork.loaded = true;
-          stork.finishReload( promise, [cache.values, cache.okeys] );
+          stork.finishReload( promise, [stork.cache.values, stork.cache.okeys] );
         }
       };
 
@@ -3400,7 +3429,7 @@ Stork.adapter('local-storage', 3, function()
           }  
         }
 
-        this.cache = cache;
+        this.cache.overwrite( cache );
         this.loaded = true;
       }
       catch (e)
@@ -3711,7 +3740,7 @@ Stork.adapter('webkit-sqlite', 6, function()
             cache.put( record.id, value, key );
           }
 
-          stork.cache = cache;
+          stork.cache.overwrite( cache );
           stork.loaded = true;
         }
         catch (e) 
@@ -4169,7 +4198,7 @@ Stork.adapter('window-name', 2, function()
           }  
         }
 
-        this.cache = cache;
+        this.cache.overwrite( cache );
         this.loaded = true;
       }
       catch (e)

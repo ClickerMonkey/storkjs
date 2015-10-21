@@ -75,7 +75,7 @@ Stork.adapter('local-storage', 3, function()
           }  
         }
 
-        this.cache = cache;
+        this.cache.overwrite( cache );
         this.loaded = true;
       }
       catch (e)

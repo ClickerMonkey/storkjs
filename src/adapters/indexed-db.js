@@ -90,9 +90,9 @@ Stork.adapter('indexed-db', 5, function()
         }
         else
         {
-          stork.cache = cache;
+          stork.cache.overwrite( cache );
           stork.loaded = true;
-          stork.finishReload( promise, [cache.values, cache.okeys] );
+          stork.finishReload( promise, [stork.cache.values, stork.cache.okeys] );
         }
       };
 
