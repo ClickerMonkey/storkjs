@@ -1685,7 +1685,15 @@ Promise.prototype =
       this.state = Promise.FAILURE;
       this.$handleFailures();
     }
-  }
+  },
+
+  // Resets this promise removing all listeners
+  $reset: function() {
+    this.state = Promise.PENDING;
+    this.successes.length = 0;
+    this.failures.length = 0;
+    this.errors.length = 0;
+  },
 
 };
 
