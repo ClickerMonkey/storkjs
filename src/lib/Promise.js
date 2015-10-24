@@ -245,6 +245,8 @@ Promise.prototype =
       this.state = Promise.SUCCESS;
       this.$handleSuccesses();
     }
+
+    return this;
   },
 
   // Executes all failures currently on the promise.
@@ -275,6 +277,8 @@ Promise.prototype =
       this.state = Promise.FAILURE;
       this.$handleFailures();
     }
+
+    return this;
   },
 
   // Resets this promise removing all listeners
@@ -284,6 +288,6 @@ Promise.prototype =
     this.successes.length = 0;
     this.failures.length = 0;
     this.errors.length = 0;
-  },
+  }
 
 };

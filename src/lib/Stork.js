@@ -184,6 +184,11 @@ Stork.prototype =
         promise: promise
 
       });
+
+      if ( promise )
+      {
+        promise.$reset();
+      }
     }
 
     return handled;
