@@ -218,6 +218,16 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="Stork.FastMap#indices"><a href="Stork.FastMap.html#indices">indices</a></li>
+            
+                <li data-name="Stork.FastMap#keys"><a href="Stork.FastMap.html#keys">keys</a></li>
+            
+                <li data-name="Stork.FastMap#okeys"><a href="Stork.FastMap.html#okeys">okeys</a></li>
+            
+                <li data-name="Stork.FastMap#values"><a href="Stork.FastMap.html#values">values</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -233,6 +243,8 @@
                 <li data-name="Stork.FastMap#hasOverlap"><a href="Stork.FastMap.html#hasOverlap">hasOverlap</a></li>
             
                 <li data-name="Stork.FastMap#indexOf"><a href="Stork.FastMap.html#indexOf">indexOf</a></li>
+            
+                <li data-name="Stork.FastMap#overwrite"><a href="Stork.FastMap.html#overwrite">overwrite</a></li>
             
                 <li data-name="Stork.FastMap#put"><a href="Stork.FastMap.html#put">put</a></li>
             
@@ -277,6 +289,8 @@
             
                 <li data-name="Stork.Promise#args"><a href="Stork.Promise.html#args">args</a></li>
             
+                <li data-name="Stork.Promise#chainFailureResult"><a href="Stork.Promise.html#chainFailureResult">chainFailureResult</a></li>
+            
                 <li data-name="Stork.Promise#context"><a href="Stork.Promise.html#context">context</a></li>
             
                 <li data-name="Stork.Promise#errors"><a href="Stork.Promise.html#errors">errors</a></li>
@@ -298,6 +312,12 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="Stork.Promise.Done"><a href="Stork.Promise.html#.Done">Done</a></li>
+            
+                <li data-name="Stork.Promise.Group"><a href="Stork.Promise.html#.Group">Group</a></li>
+            
+                <li data-name="Stork.Promise#either"><a href="Stork.Promise.html#either">either</a></li>
             
                 <li data-name="Stork.Promise#error"><a href="Stork.Promise.html#error">error</a></li>
             
@@ -789,6 +809,52 @@ callbacks.</p>
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="chainFailureResult">chainFailureResult<span class="type-signature type boolean">boolean</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Whether this promise should look at the result of the failure callbacks 
+for a promise to bind to and continue the chain.</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="context">context<span class="type-signature type object">Object</span> </h4>
     </div>
     
@@ -1115,6 +1181,471 @@ successful.</p>
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id=".Done">
+            
+            <span class="type-signature static">static</span>Stork.Promise.Done<span class="signature">(context)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Stork.Promise.html">Stork.Promise</a>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_Promise.js.html">lib/Promise.js</a>, <a href="lib_Promise.js.html#line366">line 366</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Creates a Promise that has already successfully ran.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>context</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The <code>this</code> to apply to the success, failure, and error callbacks.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+<h5>Returns:</h5>
+promise created.
+<br />
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id=".Group">
+            
+            <span class="type-signature static">static</span>Stork.Promise.Group<span class="signature">(groupSize, context, <span class="optional">success</span>, <span class="optional">failure</span>)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_Promise.js.html">lib/Promise.js</a>, <a href="lib_Promise.js.html#line385">line 385</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Creates a Promise that waits for a given number of success to be considered
+a success, any failure will cause subsequent successes to be ignored.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>groupSize</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>The number of $success calls that need to be made for the promise to
+       actually be considered a success.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>context</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>The <code>this</code> to apply to the success, failure, and error callbacks.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>success</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>A success callback to add to be invoked.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>failure</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>A failure callback to add to be invoked.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="either">
+            
+            either<span class="signature">(complete)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Stork.Promise.html">Stork.Promise</a>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_Promise.js.html">lib/Promise.js</a>, <a href="lib_Promise.js.html#line170">line 170</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Adds a callback to be invoked when either a success or failure occurs on
+this promise. If a promise is returned by the callback - once that promise
+completes the next promise will be processed on either success or failure.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>complete</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The function to invoke when either a success or a failure occurs.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+<h5>Returns:</h5>
+class="prettyprint source"><code>  The next promise to invoke when the returned promise from the
+  success callback finishes.</code></pre></li>
+</ul>
+<br />
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="error">
             
             error<span class="signature">(error)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Stork.Promise.html">Stork.Promise</a>}</span>
@@ -1122,7 +1653,7 @@ successful.</p>
     
         
         <div class="tag-source">
-            <a href="lib_Promise.js.html">lib/Promise.js</a>, <a href="lib_Promise.js.html#line159">line 159</a>
+            <a href="lib_Promise.js.html">lib/Promise.js</a>, <a href="lib_Promise.js.html#line186">line 186</a>
         </div>
         
     </div>
@@ -1248,7 +1779,7 @@ failed.</p>
     
         
         <div class="tag-source">
-            <a href="lib_Promise.js.html">lib/Promise.js</a>, <a href="lib_Promise.js.html#line129">line 129</a>
+            <a href="lib_Promise.js.html">lib/Promise.js</a>, <a href="lib_Promise.js.html#line138">line 138</a>
         </div>
         
     </div>
@@ -1417,7 +1948,7 @@ to chain promises.</p>
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Mon Oct 19 2015 23:28:47 GMT-0400 (EDT)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Sun Oct 25 2015 14:25:39 GMT-0400 (EDT)
         </footer>
     </div>
 </div>
