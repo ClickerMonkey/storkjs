@@ -429,14 +429,13 @@ Stork.prototype =
    */
   getMany: function(keys, success, failure)
   {
-    var promise = new Promise( this, success, failure );
+    var promise = Promise.Group( keys.length, this, success, failure );
 
     if ( this.handlePending( this.getMany, arguments, promise ) ) 
     {
       return promise;
     }
 
-    var gotten = 0;
     var values = [];
 
     var addValue = function(i)
@@ -445,10 +444,7 @@ Stork.prototype =
       {
         values[ i ] = value;
 
-        if ( ++gotten === keys.length )
-        {
-          promise.$success( [values, keys] );
-        }
+        promise.$success( [values, keys] );
       };
     };
     var onFailure = function(e)
@@ -745,22 +741,17 @@ Stork.prototype =
    */
   batch: function(records, success, failure)
   {
-    var promise = new Promise( this, success, failure );
+    var promise = Promise.Group( records.length, this, success, failure );
 
     if ( this.handlePending( this.batch, arguments, promise ) ) 
     {
       return promise;
     }
 
-    var saves = 0;
-
     var onSaved = function() 
     {
-      if ( ++saves === records.length ) 
-      {
-        promise.$success( [records] );
-      }
-    }
+      promise.$success( [records] );
+    };
     var setFailure = function(e) 
     {
       promise.$failure( [records, saves, e] );
@@ -1006,7 +997,7 @@ Stork.prototype =
    */
   removeMany: function(keys, success, failure)
   {
-    var promise = new Promise( this, success, failure );
+    var promise = Promise.Group( keys.length, this, success, failure );
 
     if ( this.handlePending( this.removeMany, arguments, promise ) ) 
     {
@@ -1021,12 +1012,10 @@ Stork.prototype =
       return function(value) 
       {
         values[ i ] = value;
+        removed++;
 
-        if ( ++removed === keys.length ) 
-        {
-          promise.$success( [values, keys] );
-        }
-      }
+        promise.$success( [values, keys] );
+      };
     };
     var setFailure = function(e) 
     {

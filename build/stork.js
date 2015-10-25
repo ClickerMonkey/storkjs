@@ -592,14 +592,13 @@ Stork.prototype =
    */
   getMany: function(keys, success, failure)
   {
-    var promise = new Promise( this, success, failure );
+    var promise = Promise.Group( keys.length, this, success, failure );
 
     if ( this.handlePending( this.getMany, arguments, promise ) ) 
     {
       return promise;
     }
 
-    var gotten = 0;
     var values = [];
 
     var addValue = function(i)
@@ -608,10 +607,7 @@ Stork.prototype =
       {
         values[ i ] = value;
 
-        if ( ++gotten === keys.length )
-        {
-          promise.$success( [values, keys] );
-        }
+        promise.$success( [values, keys] );
       };
     };
     var onFailure = function(e)
@@ -908,22 +904,17 @@ Stork.prototype =
    */
   batch: function(records, success, failure)
   {
-    var promise = new Promise( this, success, failure );
+    var promise = Promise.Group( records.length, this, success, failure );
 
     if ( this.handlePending( this.batch, arguments, promise ) ) 
     {
       return promise;
     }
 
-    var saves = 0;
-
     var onSaved = function() 
     {
-      if ( ++saves === records.length ) 
-      {
-        promise.$success( [records] );
-      }
-    }
+      promise.$success( [records] );
+    };
     var setFailure = function(e) 
     {
       promise.$failure( [records, saves, e] );
@@ -1169,7 +1160,7 @@ Stork.prototype =
    */
   removeMany: function(keys, success, failure)
   {
-    var promise = new Promise( this, success, failure );
+    var promise = Promise.Group( keys.length, this, success, failure );
 
     if ( this.handlePending( this.removeMany, arguments, promise ) ) 
     {
@@ -1184,12 +1175,10 @@ Stork.prototype =
       return function(value) 
       {
         values[ i ] = value;
+        removed++;
 
-        if ( ++removed === keys.length ) 
-        {
-          promise.$success( [values, keys] );
-        }
-      }
+        promise.$success( [values, keys] );
+      };
     };
     var setFailure = function(e) 
     {
@@ -1463,7 +1452,7 @@ function Promise(context, success, failure, root)
    * 
    * @type {Promise}
    */
-  this.nextFromSuccess = null;
+  this.nextPromise = null;
 
   /**
    * The current state of this promise.
@@ -1504,6 +1493,14 @@ function Promise(context, success, failure, root)
    */
   this.args = null;
 
+  /**
+   * Whether this promise should look at the result of the failure callbacks 
+   * for a promise to bind to and continue the chain.
+   * 
+   * @type {boolean}
+   */
+  this.chainFailureResult = false;
+
   // Queue the passed in success & failure callbacks.
   this.$queue( success, failure );
 }
@@ -1531,6 +1528,7 @@ Promise.SUCCESS = 2;
  * @type {Number}
  */
 Promise.CHAINED = 3;
+
 
 Promise.prototype = 
 {
@@ -1566,6 +1564,24 @@ Promise.prototype =
     }
 
     return this.next;
+  },
+
+  /**
+   * Adds a callback to be invoked when either a success or failure occurs on
+   * this promise. If a promise is returned by the callback - once that promise
+   * completes the next promise will be processed on either success or failure.
+   * 
+   * @param  {function} complete
+   *         The function to invoke when either a success or a failure occurs.
+   * @return {Stork.Promise} - 
+   *         The next promise to invoke when the returned promise from the
+   *         success callback finishes.
+   */
+  either: function(complete)
+  {
+    this.chainFailureResult = true;
+
+    return this.then( complete, complete );
   },
 
   /**
@@ -1631,9 +1647,9 @@ Promise.prototype =
       var s = succs[ i ];
       var result = s.apply( this.context, this.args );
 
-      if ( result instanceof Promise && !this.nextFromSuccess ) 
+      if ( result instanceof Promise && !this.nextPromise ) 
       {
-        this.nextFromSuccess = result;
+        this.nextPromise = result;
       }
     }
 
@@ -1648,11 +1664,12 @@ Promise.prototype =
   $handleNext: function()
   {
     var next = this.next;
-    var returned = this.nextFromSuccess;
+    var returned = this.nextPromise;
 
-    if (next && returned && this.state === Promise.SUCCESS)
+    if (next && returned && (this.state === Promise.SUCCESS || (this.state === Promise.FAILURE && this.chainFailureResult)))
     {
       next.$bindTo( returned );
+
       this.state = Promise.CHAINED;
     }
   },
@@ -1676,17 +1693,28 @@ Promise.prototype =
     var fails = this.failures;
     for (var i = 0; i < fails.length; i++) 
     {
-      fails[ i ].apply( this.context, this.args );
+      var f = fails[ i ];
+      var result = f.apply( this.context, this.args );
+
+      if ( this.chainFailureResult && result instanceof Promise && !this.nextPromise )
+      {
+        this.nextPromise = result;
+      }
     }
+
     fails.length = 0;
 
     var errors = this.root.errors;
     var errorArgument = [ this.args[ this.args.length - 1 ] ];
+
     for (var i = 0; i < errors.length; i++)
     {
       errors[ i ].apply( this.context, errorArgument );
     }
+
     errors.length = 0;
+
+    this.$handleNext();
   },
 
   // Marks this promise as a failure if the promise hasn't finished yet.
@@ -1706,11 +1734,83 @@ Promise.prototype =
   $reset: function() 
   {
     this.state = Promise.PENDING;
+    this.chainFailureResult = false;
+    this.$clear();
+    this.$stop();
+
+    return this;
+  },
+
+  // Removes all listeners
+  $clear: function()
+  {
     this.successes.length = 0;
     this.failures.length = 0;
     this.errors.length = 0;
+
+    return this;
+  },
+
+  // Stops any chained promises from getting called if they haven't been
+  // called already.
+  $stop: function()
+  {
+    this.next = null;
+    this.nextPromise = null;
+
+    return this;
   }
 
+};
+
+
+
+/**
+ * Creates a Promise that has already successfully ran.
+ * 
+ * @param {Object} context
+ *        The `this` to apply to the success, failure, and error callbacks.
+ * @return {Stork.Promise}
+ *         The promise created.
+ */
+Promise.Done = function(context)
+{
+  return new Promise( context ).$success();
+};
+
+/**
+ * Creates a Promise that waits for a given number of success to be considered
+ * a success, any failure will cause subsequent successes to be ignored.
+ * 
+ * @param {Number} groupSize
+ *        The number of $success calls that need to be made for the promise to
+ *        actually be considered a success.
+ * @param {Object} context
+ *        The `this` to apply to the success, failure, and error callbacks.
+ * @param {function} [success]
+ *        A success callback to add to be invoked.
+ * @param {function} [failure]
+ *        A failure callback to add to be invoked.
+ */
+Promise.Group = function(groupSize, context, success, failure)
+{
+  var group = new Promise( context, success, failure );
+  var count = 0;
+  var $success = group.$success;
+
+  // Override it! Inefficient, but easiest for now.
+  group.$success = function( args )
+  {
+    if ( this.state === Promise.PENDING )
+    {
+      if ( ++count === groupSize )
+      {
+        $success.call( group, args );
+      }
+    }
+  };
+
+  return group;
 };
 
 /**
