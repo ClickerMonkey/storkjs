@@ -3746,15 +3746,15 @@ Stork.adapter('webkit-sqlite', 6, function()
 {
   var DATABASE_NAME = 'stork';
 
-  var SQL_CREATE = 'CREATE TABLE IF NOT EXISTS {0} (id TEXT PRIMARY KEY, value TEXT)';
-  var SQL_SELECT  = 'SELECT value FROM {0} WHERE id = ?';
-  var SQL_SELECT_ALL = 'SELECT id, value FROM {0}';
-  var SQL_SELECT_MANY = 'SELECT id, value FROM {0} WHERE id IN ({1})';
-  var SQL_INSERT = 'INSERT OR REPLACE INTO {0} (id, value) VALUES (?, ?)';
-  var SQL_DELETE = 'DELETE FROM {0} WHERE id = ?';
-  var SQL_COUNT = 'SELECT COUNT(*) as count FROM {0}';
-  var SQL_DESTROY = 'DELETE FROM {0}';
-  var SQL_DELETE_MANY = 'DELETE FROM {0} WHERE id IN ({1})';
+  var SQL_CREATE = 'CREATE TABLE IF NOT EXISTS "{0}" ("id" TEXT PRIMARY KEY, "value" TEXT)';
+  var SQL_SELECT  = 'SELECT "value" FROM "{0}" WHERE "id" = ?';
+  var SQL_SELECT_ALL = 'SELECT "id", "value" FROM "{0}"';
+  var SQL_SELECT_MANY = 'SELECT "id", "value" FROM "{0}" WHERE "id" IN ({1})';
+  var SQL_INSERT = 'INSERT OR REPLACE INTO "{0}" ("id", "value") VALUES (?, ?)';
+  var SQL_DELETE = 'DELETE FROM "{0}" WHERE "id" = ?';
+  var SQL_COUNT = 'SELECT COUNT(*) as "count" FROM "{0}"';
+  var SQL_DESTROY = 'DELETE FROM "{0}"';
+  var SQL_DELETE_MANY = 'DELETE FROM "{0}" WHERE "id" IN ({1})';
 
   function streplace(str, arr)
   {

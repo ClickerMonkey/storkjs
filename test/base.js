@@ -409,6 +409,35 @@ function TestBase(adapter, prepend, hasBackend)
 
   if ( hasBackend )
   {
+    test('risky name', function(assert)
+    {
+      var db = new Stork({name: 'group', adapter: adapter});
+
+      var done = assert.async();
+
+      db.then(function()
+        {
+          return this.save({id: 4, name: 'Group'});
+        })
+        .then(function()
+        {
+          return new Stork({name: 'group', adapter: adapter, lazy: true}).initializing;
+        })
+        .then(function()
+        {
+          return this.get(4);
+        })
+        .then(function(record)
+        {
+          equal( record.name, 'Group', 'record saved' );
+
+          return this.destroy();
+        })
+        .then( success( done ) )
+        .error( fail( done ) )
+      ;
+    });
+
     test('lazy destroy', function(assert)
     {
       var db = new Stork({name: prepend + 'lazydestroy', adapter: adapter, lazy: true});
