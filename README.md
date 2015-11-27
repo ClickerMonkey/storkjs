@@ -1,6 +1,8 @@
 # StorkJS
 ### Simple key-value storage in your browser. 
 
+Easiest way to install is via bower with `bower install storkjs`.
+
 [View Documentation](http://clickermonkey.github.io/storkjs) /
 [Download stork.js](https://raw.githubusercontent.com/ClickerMonkey/storkjs/master/build/stork.js) /
 [Download stork.min.js](https://raw.githubusercontent.com/ClickerMonkey/storkjs/master/build/stork.min.js)

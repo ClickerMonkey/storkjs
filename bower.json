@@ -1,0 +1,25 @@
+{
+  "name": "storkjs",
+  "version": "1.0.0",
+  "homepage": "https://github.com/ClickerMonkey/storkjs",
+  "authors": [
+    "Philip Diffenderfer <pdiffenderfer@gmail.com>"
+  ],
+  "description": "Simple key-value storage in your browser.",
+  "main": "build/stork.js",
+  "keywords": [
+    "javascript",
+    "key-value",
+    "storage",
+    "offline",
+    "sqlite"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
