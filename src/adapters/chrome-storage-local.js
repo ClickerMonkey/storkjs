@@ -3,7 +3,7 @@ Stork.adapter('chrome-storage-local', 4, function()
 {
   var store = window.chrome && chrome.storage ? chrome.storage.local : false;
 
-  function isError() 
+  function isError()
   {
     return chrome && chrome.runtime && chrome.runtime.lastError;
   };
@@ -20,14 +20,14 @@ Stork.adapter('chrome-storage-local', 4, function()
       return fromJson( rawKey.substring( this.prefix.length ) );
     },
 
-    valid: function() 
+    valid: function()
     {
-      if (!store) 
+      if (!store)
       {
         return false;
       }
 
-      try 
+      try
       {
         var temp = Math.random();
         var map = {};
@@ -37,17 +37,17 @@ Stork.adapter('chrome-storage-local', 4, function()
         store.remove( temp );
 
         return true;
-      } 
-      catch (e) 
+      }
+      catch (e)
       {
         return false;
       }
     },
 
-    init: function(options, success, failure) 
+    init: function(options, success, failure)
     {
       var promise = new Promise( this, success, failure );
-      
+
       this.prefix = coalesce( options.prefix, this.name + '-' );
 
       if ( this.lazy )
@@ -131,11 +131,11 @@ Stork.adapter('chrome-storage-local', 4, function()
       {
         store.remove( this.cache.keys, function()
         {
-          if ( isError() ) 
+          if ( isError() )
           {
             promise.$failure( [isError()] );
           }
-          else 
+          else
           {
             stork.cache.reset();
 
@@ -158,6 +158,49 @@ Stork.adapter('chrome-storage-local', 4, function()
       }
     },
 
+    _resetPromise: function(keys, values, success, failure)
+    {
+      return new Promise( this, success, failure );
+    },
+
+    _reset: function(keys, values, rawKeys, rawValues, promise)
+    {
+      var stork = this;
+
+      var setFailure = function(e)
+      {
+        promise.$failure( [keys, values, e] );
+      };
+      var onDestroyed = function()
+      {
+        var obj = {};
+
+        for (var i = 0; i < values.length; i++)
+        {
+          obj[ rawKeys[ i ] ] = values[ i ];
+        }
+
+        store.set( obj, function()
+        {
+          if ( isError() )
+          {
+            setFailure( isError() );
+          }
+          else
+          {
+            for (var i = 0; i < values.length; i++)
+            {
+              stork.cache.put( rawKeys[ i ], values[ i ], keys[ i ] );
+            }
+
+            promise.$success( [keys, values] );
+          }
+        });
+      };
+
+      this._destroy( new Promise( this, onDestroyed, setFailure ) );
+    },
+
     _put: function(key, value, rawKey, rawValue, promise)
     {
       var stork = this;
@@ -165,13 +208,13 @@ Stork.adapter('chrome-storage-local', 4, function()
 
       obj[ rawKey ] = value;
 
-      store.set( obj, function() 
+      store.set( obj, function()
       {
-        if ( isError() ) 
+        if ( isError() )
         {
           promise.$failure( [key, value, isError()] );
-        } 
-        else 
+        }
+        else
         {
           var previousValue = stork.cache.get( rawKey );
 
@@ -183,7 +226,7 @@ Stork.adapter('chrome-storage-local', 4, function()
     },
 
     _remove: function(key, rawKey, value, promise)
-    {  
+    {
       var stork = this;
 
       store.remove( rawKey, function()

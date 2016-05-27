@@ -5,8 +5,9 @@ var sourcemaps = require('gulp-sourcemaps');
 var plugins = require('gulp-load-plugins')();
 var gutil = require('gulp-util');
 var shell = require('gulp-shell');
+var size = require('gulp-check-filesize');
 
-var core = 
+var core =
 [
   './src/header.js',
   './src/lib/functions.js',
@@ -19,7 +20,7 @@ var core =
   './src/footer.js'
 ];
 
-var builds = 
+var builds =
 {
   default:
   {
@@ -39,6 +40,7 @@ var executeMinifiedBuild = function(props)
         .pipe( plugins.concat( props.minified ) )
         .pipe( plugins.uglify().on('error', gutil.log) )
       .pipe( sourcemaps.write('.') )
+      .pipe( size({enableGzip: true}) )
       .pipe( gulp.dest( props.output ) )
     ;
   };
@@ -50,6 +52,7 @@ var executeBuild = function(props)
     return gulp
       .src( props.include )
       .pipe( plugins.concat( props.filename ) )
+      .pipe( size({enableGzip: true}) )
       .pipe( gulp.dest( props.output ) )
     ;
   };

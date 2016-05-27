@@ -197,19 +197,19 @@ function Stork(options, success, failure)
   if (!JSON) throw 'JSON unavailable! Include http://www.json.org/json2.js to fix.';
 
   /**
-   * The options passed to the constructor and subsequently to the 
+   * The options passed to the constructor and subsequently to the
    * {@link Stork#init} function.
-   * 
+   *
    * @type {Object}
    * @default  {}
    */
   this.options = options = (options || {});
 
   /**
-   * The name of the property to use as the key for the 
-   * {@link Stork#save} and {@link Stork#batch} functions. This should 
+   * The name of the property to use as the key for the
+   * {@link Stork#save} and {@link Stork#batch} functions. This should
    * be specified in the `options` object.
-   * 
+   *
    * @type {String}
    * @default 'id'
    */
@@ -218,7 +218,7 @@ function Stork(options, success, failure)
   /**
    * The name used to group the key-value pairs. This is essentially
    * a table name. This should be specified in the `options` object.
-   *           
+   *
    * @type {String}
    * @default ''
    */
@@ -226,30 +226,30 @@ function Stork(options, success, failure)
 
   /**
    * If true, key-value pairs will be lazily loaded instead of loaded
-   * all at once on initialization. This should be specified in the 
+   * all at once on initialization. This should be specified in the
    * `options` object.
-   *           
+   *
    * @type {Boolean}
    * @default false
    */
   this.lazy = coalesce( options.lazy, false );
 
   /**
-   * The cache of key-value pairs currently loaded. If 
+   * The cache of key-value pairs currently loaded. If
    * {@link Stork#loaded} is true then all key-value pairs exist in
    * the cache.
-   *           
+   *
    * @type {FastMap}
    */
   this.cache = new FastMap();
 
   /**
    * An array of functions called by the user before this instances
-   * was finished initializing. Once this instance successfully finishes 
+   * was finished initializing. Once this instance successfully finishes
    * initialization all pending functions are invoked in the order
    * in which they were originally made and this property is set to
    * `null`.
-   *           
+   *
    * @type {Object[]}
    */
   this.pending = [];
@@ -257,18 +257,18 @@ function Stork(options, success, failure)
   /**
    * True if this instance has successfully initialized, otherwise
    * false if it failed to initialize or has not finished initializing.
-   *           
+   *
    * @type {Boolean}
    */
   this.initialized = false;
 
   /**
-   * True if the entire instance has been loaded into the 
+   * True if the entire instance has been loaded into the
    * {@link Stork#cache}, otherwise false. If lazy is specifed as true
    * loaded will be false until any of the following methods are
    * invoked: {@link Stork#each}, {@link Stork#all}, or
    * {@link Stork#reload}.
-   *           
+   *
    * @type {Boolean}
    */
   this.loaded = false;
@@ -278,14 +278,14 @@ function Stork(options, success, failure)
    * `Object` definition properties. The adapter can be chosen based
    * on the `options.adapter` and falls back to the next supported
    * adapter based on priority.
-   *           
+   *
    * @type {Object}
    */
   this.adapter = getAdapter( options.adapter );
 
   // Copy the chosen adapter methods into this instance.
   copy( this.adapter.definition, this );
-  
+
   // Call each plugin on this instance before initialization starts.
   for (var i = 0; i < Stork.plugins.length; i++)
   {
@@ -296,7 +296,7 @@ function Stork(options, success, failure)
   this.initializing = this.init( this.options, success, failure );
 }
 
-Stork.prototype = 
+Stork.prototype =
 {
 
   /**
@@ -318,27 +318,27 @@ Stork.prototype =
    * @return {String}
    */
   encode: toJson,
-  
+
   /**
    * Returns true if this Stork is not ready for storage calls and queues
    * the method and arguments to be called after this Stork is initialized.
    *
    * @private
-   * @param  {function} method 
+   * @param  {function} method
    *         The reference to the calling function
-   * @param  {Arguments} args 
+   * @param  {Arguments} args
    *         The arguments of the calling function
-   * @param  {Stork.Promise} promise 
+   * @param  {Stork.Promise} promise
    *         The promise to notify when the function is finally called.
    * @return {Boolean} -
    *         Returns true if the calling function should return this
    *         immediately because the implementation isn't initialized yet.
    */
-  handlePending: function(method, args, promise) 
+  handlePending: function(method, args, promise)
   {
     var handled = !this.initialized;
 
-    if (handled) 
+    if (handled)
     {
       this.pending.push(
       {
@@ -366,15 +366,15 @@ Stork.prototype =
    * @return {Stork} -
    *         A reference to this.
    */
-  finishInitialization: function(promise, args) 
+  finishInitialization: function(promise, args)
   {
-    if (!this.initialized) 
+    if (!this.initialized)
     {
       this.initialized = true;
 
       promise.$success( args );
 
-      for (var i = 0; i < this.pending.length; i++) 
+      for (var i = 0; i < this.pending.length; i++)
       {
         var pending = this.pending[ i ];
         var newPromise = pending.method.apply( this, pending.arguments );
@@ -418,17 +418,17 @@ Stork.prototype =
 
   /**
    * Determines whether this Stork implementation is available.
-   * 
+   *
    * @return {Boolean} True if this Stork is usable, otherwise false.
    */
-  valid: function() 
+  valid: function()
   {
     throw 'Stork.valid is not implemented';
   },
-  
+
   /**
    * The format of success callback for {@link Stork#init}.
-   * 
+   *
    * @callback Stork~initSuccess
    * @param {Stork} stork
    *        The reference to this Stork instance.
@@ -436,7 +436,7 @@ Stork.prototype =
 
   /**
    * The format of failure callback for {@link Stork#init}.
-   * 
+   *
    * @callback Stork~initFailure
    * @param {Any} error
    *        The error that was thrown.
@@ -447,11 +447,11 @@ Stork.prototype =
    * key-value pairs will not be loaded here, otherwise all key-value
    * pairs will be loaded. This function is automatically called at the end
    * of the Stork constructor with the options passed to the constructor.
-   * 
+   *
    * @param  {Object} options
    *         The initialization options.
    * @param  {Stork~initSuccess} [success]
-   *         The function to invoke when the Stork instance successfully 
+   *         The function to invoke when the Stork instance successfully
    *         initializes and is usable.
    * @param  {Stork~initFailure} [failure]
    *         The function to invoke if there's a problem initializing.
@@ -459,14 +459,14 @@ Stork.prototype =
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
-  init: function(options, success, failure) 
+  init: function(options, success, failure)
   {
     throw 'Stork.init is not implemented';
   },
-  
+
   /**
    * The format of success callback for {@link Stork#reload}.
-   * 
+   *
    * @callback Stork~reloadSuccess
    * @param {Array} values
    *        An array of all values loaded. This should not be modified.
@@ -476,15 +476,15 @@ Stork.prototype =
 
   /**
    * The format of failure callback for {@link Stork#reload}.
-   * 
+   *
    * @callback Stork~reloadFailure
    * @param {Any} error
    *        The error that was thrown.
    */
 
   /**
-   * Loads all key-value pairs into the cache which will increase performance 
-   * for fetching operations ({@link Stork#get}, {@link Stork#getMany}, 
+   * Loads all key-value pairs into the cache which will increase performance
+   * for fetching operations ({@link Stork#get}, {@link Stork#getMany},
    * {@link Stork#each}, {@link Stork#all}).
    *
    * *Usage*
@@ -499,7 +499,7 @@ Stork.prototype =
    * db.reload( onSucessFunc, onFailureFunc ); // listen for success/failure
    * db.reload().then( onSuccessFunc, onFailureFunc ); // listen to promise
    * ```
-   * 
+   *
    * @param  {Stork~reloadSuccess} [success]
    *         The function to invoke when all key-value pairs are loaded.
    * @param  {Stork~reloadFailure} [failure]
@@ -533,7 +533,7 @@ Stork.prototype =
    *   })
    * ;
    * ```
-   * 
+   *
    * @param  {function} callback
    *         The callback to invoke with this Stork instance as `this`.
    * @return {Stork.Promise} -
@@ -546,20 +546,20 @@ Stork.prototype =
 
   /**
    * The format of success callback for {@link Stork#getMany}.
-   * 
+   *
    * @callback Stork~getManySuccess
    * @param {Array} values
-   *        The array of values associated to the given keys. If a key wasn't 
+   *        The array of values associated to the given keys. If a key wasn't
    *        found then the value in the array will be `undefined`.
    */
 
   /**
    * The format of failure callback for {@link Stork#getMany}.
-   * 
+   *
    * @callback Stork~getManyFailure
    * @param {Array} keys
    *        The keys given that resulted in an error.
-   * @param {Any} error 
+   * @param {Any} error
    *        The error that was thrown.
    */
 
@@ -579,7 +579,7 @@ Stork.prototype =
    * db.getMany( arrayOfKeys, onSucessFunc, onFailureFunc ); // listen for success/failure
    * db.getMany( arrayOfKeys ).then( onSuccessFunc, onFailureFunc ); // listen to promise
    * ```
-   * 
+   *
    * @param  {Array} keys
    *         The keys of the key-value pairs to get.
    * @param  {Stork~getManySuccess} [success]
@@ -594,7 +594,7 @@ Stork.prototype =
   {
     var promise = Promise.Group( keys.length, this, success, failure );
 
-    if ( this.handlePending( this.getMany, arguments, promise ) ) 
+    if ( this.handlePending( this.getMany, arguments, promise ) )
     {
       return promise;
     }
@@ -625,7 +625,7 @@ Stork.prototype =
 
   /**
    * The format of success callback for {@link Stork#get}.
-   * 
+   *
    * @callback Stork~getSuccess
    * @param {Any} value
    *        The value associated to the given key or `undefined` if one was not
@@ -636,11 +636,11 @@ Stork.prototype =
 
   /**
    * The format of failure callback for {@link Stork#get}.
-   * 
+   *
    * @callback Stork~getFailure
    * @param {Any} key
    *        The key of the key-value pair that was unsuccessfully gotten.
-   * @param {Any} error 
+   * @param {Any} error
    *        The error that was thrown.
    */
 
@@ -659,7 +659,7 @@ Stork.prototype =
    * db.get( key, onSucessFunc, onFailureFunc ); // listen for success/failure
    * db.get( key ).then( onSuccessFunc, onFailureFunc ); // listen to promise
    * ```
-   * 
+   *
    * @param  {Any} key
    *         The key of the key-value pair to get.
    * @param  {Stork~getSuccess} [success]
@@ -674,7 +674,7 @@ Stork.prototype =
   {
     var promise = new Promise( this, success, failure );
 
-    if ( this.handlePending( this.get, arguments, promise ) ) 
+    if ( this.handlePending( this.get, arguments, promise ) )
     {
       return promise;
     }
@@ -716,15 +716,15 @@ Stork.prototype =
 
   /**
    * The format of success callback for {@link Stork#destroy}.
-   * 
+   *
    * @callback Stork~destroySuccess
    */
 
   /**
    * The format of failure callback for {@link Stork#destroy}.
-   * 
+   *
    * @callback Stork~destroyFailure
-   * @param {Any} error 
+   * @param {Any} error
    *        The error that was thrown.
    */
 
@@ -743,7 +743,7 @@ Stork.prototype =
    * db.destroy( onSucessFunc, onFailureFunc ); // listen for success/failure
    * db.destroy().then( onSuccessFunc, onFailureFunc ); // listen to promise
    * ```
-   * 
+   *
    * @param  {Stork~destroySuccess} [success]
    *         The function invoked when all key-value pairs are removed.
    * @param  {Stork~destroyFailure} [failure]
@@ -753,11 +753,11 @@ Stork.prototype =
    *         The promise that can be used to listen for success or failure, as
    *         well as chaining additional calls.
    */
-  destroy: function(success, failure) 
+  destroy: function(success, failure)
   {
     var promise = new Promise( this, success, failure );
 
-    if ( this.handlePending( this.destroy, arguments, promise ) ) 
+    if ( this.handlePending( this.destroy, arguments, promise ) )
     {
       return promise;
     }
@@ -772,9 +772,124 @@ Stork.prototype =
     throw 'Stork._destroy is not implemented';
   },
 
+
+
+  /**
+   * The format of success callback for {@link Stork#reset}.
+   *
+   * @callback Stork~resetSuccess
+   * @param {Any[]} keys
+   *        The array of keys to reset.
+   * @param {Any[]} values
+   *        The array of values to reset.
+   */
+
+  /**
+   * The format of failure callback for {@link Stork#reset}.
+   *
+   * @callback Stork~resetFailure
+   * @param {Any[]} keys
+   *        The array of keys to reset.
+   * @param {Any[]} values
+   *        The array of values to reset.
+   * @param {Any} error
+   *        The error that was thrown.
+   */
+
+  /**
+   * Resets the key-value pairs. This is equivalent to destroying and running
+   * a batch save on all the key-value pairs. Once reset the callback is
+   * invoked.
+   *
+   * *Usage*
+   * ```javascript
+   * var onSuccessFunc = function() {
+   *   // DESTROYED!
+   * };
+   * var onFailureFunc = function(error) {
+   *   // uh oh!
+   * };
+   * db.reset([3], ['value']); // I don't care about whether it succeeds or fails
+   * db.reset([3], ['value'], onSucessFunc, onFailureFunc ); // listen for success/failure
+   * db.reset([3], ['value']).then( onSuccessFunc, onFailureFunc ); // listen to promise
+   * ```
+   *
+   * @param {Any[]} keys
+   *         The array of keys to reset.
+   * @param {Any[]} values
+   *         The array of values to reset.
+   * @param  {Stork~resetSuccess} [success]
+   *         The function invoked when all key-value pairs are Reset.
+   * @param  {Stork~resetFailure} [failure]
+   *         The function invoked if there was a problem reseting all key-value
+   *         pairs.
+   * @return {Stork.Promise} -
+   *         The promise that can be used to listen for success or failure, as
+   *         well as chaining additional calls.
+   */
+  reset: function(keys, values, success, failure)
+  {
+    var promise = this._resetPromise( keys, values, success, failure );
+
+    if ( this.handlePending( this.reset, arguments, promise ) )
+    {
+      return promise;
+    }
+
+    var rawKeys = [], rawValues = [];
+
+    try
+    {
+      for (var i = 0; i < values.length; i++)
+      {
+        rawKeys[ i ] = this.encode( keys[ i ] );
+        rawValues[ i ] = toJson( values[ i ] );
+      }
+    }
+    catch (e)
+    {
+      promise.$failure( [keys, values, e] );
+    }
+
+    if ( promise.$pending() )
+    {
+      this._reset( keys, values, rawKeys, rawValues, promise );
+    }
+
+    return promise;
+  },
+
+  _resetPromise: function(keys, values, success, failure)
+  {
+    return Promise.Group( values.length, this, success, failure );
+  },
+
+  _reset: function(keys, values, rawKeys, rawValues, promise)
+  {
+    var onSaved = function()
+    {
+      promise.$success( [keys, values] );
+    };
+    var setFailure = function(e)
+    {
+      promise.$failure( [keys, values, e] );
+    };
+    var onDestroyed = function()
+    {
+      for (var i = 0; i < values.length && !promise.state; i++)
+      {
+        var valuePromise = new Promise( this, onSaved, setFailure );
+
+        this._put( keys[ i ], values[ i ], rawKeys[ i ], rawValues[ i ], valuePromise );
+      }
+    };
+
+    this.destroy( onDestroyed, setFailure );
+  },
+
   /**
    * The format of success callback for {@link Stork#save}.
-   * 
+   *
    * @callback Stork~saveSuccess
    * @param {Object} record
    *        The record that successfully saved.
@@ -782,19 +897,19 @@ Stork.prototype =
 
   /**
    * The format of failure callback for {@link Stork#save}.
-   * 
+   *
    * @callback Stork~saveFailure
    * @param {Object} record
    *        The record that failed to save.
-   * @param {Any} error 
+   * @param {Any} error
    *        The error that was thrown.
    */
 
   /**
-   * Saves an `Object` record and returns the saved record to the callback. The 
-   * record is the value in the key-value pair and the key is pulled from the 
-   * record based on the options passed into the {@link Stork#init} function. 
-   * The property used as the key is `this.key` and by default is `id`. If a key 
+   * Saves an `Object` record and returns the saved record to the callback. The
+   * record is the value in the key-value pair and the key is pulled from the
+   * record based on the options passed into the {@link Stork#init} function.
+   * The property used as the key is `this.key` and by default is `id`. If a key
    * isn't specified in a record then a UUID is used and placed in the object.
    *
    * *Usage*
@@ -809,7 +924,7 @@ Stork.prototype =
    * db.save( record, onSucessFunc, onFailureFunc ); // listen for success/failure
    * db.save( record ).then( onSuccessFunc, onFailureFunc ); // listen to promise
    * ```
-   * 
+   *
    * @param  {Object} record
    *         The record to save.
    * @param  {Stork~saveSuccess} [success]
@@ -824,7 +939,7 @@ Stork.prototype =
   {
     var promise = new Promise( this, success, failure );
 
-    if ( this.handlePending( this.save, arguments, promise ) ) 
+    if ( this.handlePending( this.save, arguments, promise ) )
     {
       return promise;
     }
@@ -832,7 +947,7 @@ Stork.prototype =
     var keyName = this.key;
     var key = record[ keyName ];
 
-    if ( undef( key ) ) 
+    if ( undef( key ) )
     {
       key = record[ keyName ] = uuid();
     }
@@ -853,7 +968,7 @@ Stork.prototype =
 
   /**
    * The format of success callback for {@link Stork#batch}.
-   * 
+   *
    * @callback Stork~batchSuccess
    * @param {Array} records
    *        The records successfully saved.
@@ -861,22 +976,22 @@ Stork.prototype =
 
   /**
    * The format of failure callback for {@link Stork#batch}.
-   * 
+   *
    * @callback Stork~batchFailure
    * @param {Array} records
    *        The records unsuccessfully saved.
    * @param {Number} recordsSaved
    *        The number of records that successfully saved.
-   * @param {Any} error 
+   * @param {Any} error
    *        The error that was thrown.
    */
 
   /**
-   * Saves an array of `Object` records and returns the records saved to the 
-   * callback. The record is the value in the key-value pair and the key is 
-   * pulled from the record based on the options passed into the 
+   * Saves an array of `Object` records and returns the records saved to the
+   * callback. The record is the value in the key-value pair and the key is
+   * pulled from the record based on the options passed into the
    * {@link Stork#init} function. The property used as the key is `this.key` and
-   * by default is `id`. If a key isn't specified in a record then a UUID is 
+   * by default is `id`. If a key isn't specified in a record then a UUID is
    * used and placed in the object.
    *
    * *Usage*
@@ -891,7 +1006,7 @@ Stork.prototype =
    * db.batch( records, onSucessFunc, onFailureFunc ); // listen for success/failure
    * db.batch( records ).then( onSuccessFunc, onFailureFunc ); // listen to promise
    * ```
-   * 
+   *
    * @param  {Array} records
    *         The array of objects to save.
    * @param  {Stork~batchSuccess} [success]
@@ -906,16 +1021,16 @@ Stork.prototype =
   {
     var promise = Promise.Group( records.length, this, success, failure );
 
-    if ( this.handlePending( this.batch, arguments, promise ) ) 
+    if ( this.handlePending( this.batch, arguments, promise ) )
     {
       return promise;
     }
 
-    var onSaved = function() 
+    var onSaved = function()
     {
       promise.$success( [records] );
     };
-    var setFailure = function(e) 
+    var setFailure = function(e)
     {
       promise.$failure( [records, saves, e] );
     };
@@ -930,7 +1045,7 @@ Stork.prototype =
 
   /**
    * The format of success callback for {@link Stork#put}.
-   * 
+   *
    * @callback Stork~putSuccess
    * @param {Any} key
    *        The key to add or update.
@@ -942,13 +1057,13 @@ Stork.prototype =
 
   /**
    * The format of failure callback for {@link Stork#put}.
-   * 
+   *
    * @callback Stork~putFailure
    * @param {Any} key
    *        The key that failed to be added or updated.
    * @param {Any} value
    *        The value that failed to be added or updated.
-   * @param {Any} error 
+   * @param {Any} error
    *        The error that was thrown.
    */
 
@@ -968,13 +1083,13 @@ Stork.prototype =
    * db.put( key, value, onSucessFunc, onFailureFunc ); // listen for success/failure
    * db.put( key, value ).then( onSuccessFunc, onFailureFunc ); // listen to promise
    * ```
-   * 
+   *
    * @param  {Any} key
    *         The key to add or update.
    * @param  {Any} value
    *         The value to add or update.
    * @param  {Stork~putSuccess} [success]
-   *         The function to invoke when the key-value pair is successfully 
+   *         The function to invoke when the key-value pair is successfully
    *         added or updated.
    * @param  {Stork~putFailure} [failure]
    *         The function to invoke if there was a problem putting the key-value
@@ -987,7 +1102,7 @@ Stork.prototype =
   {
     var promise = new Promise( this, success, failure );
 
-    if ( this.handlePending( this.put, arguments, promise ) ) 
+    if ( this.handlePending( this.put, arguments, promise ) )
     {
       return promise;
     }
@@ -997,7 +1112,7 @@ Stork.prototype =
     try
     {
       rawKey = this.encode( key );
-      rawValue = toJson( value );   
+      rawValue = toJson( value );
     }
     catch (e)
     {
@@ -1019,7 +1134,7 @@ Stork.prototype =
 
   /**
    * The format of success callback for {@link Stork#remove}.
-   * 
+   *
    * @callback Stork~removeSuccess
    * @param {Any} value
    *        The value removed or `undefined` if the key didn't exist.
@@ -1029,11 +1144,11 @@ Stork.prototype =
 
   /**
    * The format of failure callback for {@link Stork#remove}.
-   * 
+   *
    * @callback Stork~removeFailure
    * @param {Any} key
    *        The key of the key-value pair that failed to be removed.
-   * @param {Any} error 
+   * @param {Any} error
    *        The error that was thrown.
    */
 
@@ -1053,7 +1168,7 @@ Stork.prototype =
    * db.remove( key, onSucessFunc, onFailureFunc ); // listen for success/failure
    * db.remove( key ).then( onSuccessFunc, onFailureFunc ); // listen to promise
    * ```
-   * 
+   *
    * @param  {Any} key
    *         The key of the key-value pair to remove.
    * @param  {Stork~removeSuccess} [success]
@@ -1068,7 +1183,7 @@ Stork.prototype =
   {
     var promise = new Promise( this, success, failure );
 
-    if ( this.handlePending( this.remove, arguments, promise ) ) 
+    if ( this.handlePending( this.remove, arguments, promise ) )
     {
       return promise;
     }
@@ -1094,7 +1209,7 @@ Stork.prototype =
       {
         var value = this.cache.get( rawKey );
 
-        this._remove( key, rawKey, value, promise );      
+        this._remove( key, rawKey, value, promise );
       }
     }
 
@@ -1108,7 +1223,7 @@ Stork.prototype =
 
   /**
    * The format of success callback for {@link Stork#removeMany}.
-   * 
+   *
    * @callback Stork~removeManySuccess
    * @param {Array} values
    *        The values removed in the same order of the keys. If a key didn't
@@ -1119,18 +1234,18 @@ Stork.prototype =
 
   /**
    * The format of failure callback for {@link Stork#removeMany}.
-   * 
+   *
    * @callback Stork~removeManyFailure
    * @param {Array} values
    *        The values removed in the same order of the given keys.
    * @param {Number} removed
    *        The number of records removed before the error occurred.
-   * @param {Any} error 
+   * @param {Any} error
    *        The error that was thrown.
    */
 
   /**
-   * Removes multiple key-value pairs and returns the values removed to the 
+   * Removes multiple key-value pairs and returns the values removed to the
    * given callback.
    *
    * *Usage*
@@ -1145,11 +1260,11 @@ Stork.prototype =
    * db.removeMany( keys, onSucessFunc, onFailureFunc ); // listen for success/failure
    * db.removeMany( keys ).then( onSuccessFunc, onFailureFunc ); // listen to promise
    * ```
-   * 
+   *
    * @param  {Array} keys
    *         The array of keys to remove.
    * @param  {Stork~removeManySuccess} [success]
-   *         The function to invoke once all matching key-value pairs are 
+   *         The function to invoke once all matching key-value pairs are
    *         removed, with the values removed.
    * @param  {Stork~removeManyFailure} [failure]
    *         The function to invoke if there was a problem removing any of the
@@ -1162,7 +1277,7 @@ Stork.prototype =
   {
     var promise = Promise.Group( keys.length, this, success, failure );
 
-    if ( this.handlePending( this.removeMany, arguments, promise ) ) 
+    if ( this.handlePending( this.removeMany, arguments, promise ) )
     {
       return promise;
     }
@@ -1172,7 +1287,7 @@ Stork.prototype =
 
     var addValue = function(i)
     {
-      return function(value) 
+      return function(value)
       {
         values[ i ] = value;
         removed++;
@@ -1180,7 +1295,7 @@ Stork.prototype =
         promise.$success( [values, keys] );
       };
     };
-    var setFailure = function(e) 
+    var setFailure = function(e)
     {
       promise.$failure( [values, removed, e] );
     };
@@ -1195,7 +1310,7 @@ Stork.prototype =
 
   /**
    * The format of success callback for {@link Stork#each}.
-   * 
+   *
    * @callback Stork~eachSuccess
    * @param {Any} value
    *        The value of the current key-value pair.
@@ -1205,9 +1320,9 @@ Stork.prototype =
 
   /**
    * The format of failure callback for {@link Stork#each}.
-   * 
+   *
    * @callback Stork~eachFailure
-   * @param {Any} error 
+   * @param {Any} error
    *        The error that was thrown.
    */
 
@@ -1225,18 +1340,18 @@ Stork.prototype =
    * db.each( onPairFunc ); // I don't care about whether it fails
    * db.each( onPairFunc, onFailureFunc ); // listen for success & failure
    * ```
-   * 
+   *
    * @param  {Stork~eachSuccess} callback
    *         The function to invoke for each key-value pair.
    * @param  {Stork~eachFailure} [failure]
-   *         The function to invoke if there was a problem iterating the 
+   *         The function to invoke if there was a problem iterating the
    *         key-value pairs.
    * @return {Stork} -
    *         The reference to this Stork instance.
    */
   each: function(callback, failure)
   {
-    if ( !isFunc( callback ) || this.handlePending( this.each, arguments ) ) 
+    if ( !isFunc( callback ) || this.handlePending( this.each, arguments ) )
     {
       return this;
     }
@@ -1267,7 +1382,7 @@ Stork.prototype =
 
   /**
    * The format of success callback for {@link Stork#size}.
-   * 
+   *
    * @callback Stork~sizeSuccess
    * @param {Number} count
    *        The total number of key-value pairs.
@@ -1275,9 +1390,9 @@ Stork.prototype =
 
   /**
    * The format of failure callback for {@link Stork#size}.
-   * 
+   *
    * @callback Stork~sizeFailure
-   * @param {Any} error 
+   * @param {Any} error
    *        The error that was thrown.
    */
 
@@ -1295,7 +1410,7 @@ Stork.prototype =
    * db.size( onSucessFunc, onFailureFunc ); // listen for success/failure
    * db.size().then( onSuccessFunc, onFailureFunc ); // listen to promise
    * ```
-   * 
+   *
    * @param  {Stork~sizeSuccess} [success]
    *         The function to invoke with the number of key-value pairs.
    * @param  {Stork~sizeFailure} [failure]
@@ -1309,7 +1424,7 @@ Stork.prototype =
   {
     var promise = new Promise( this, success, failure );
 
-    if ( this.handlePending( this.size, arguments, promise ) ) 
+    if ( this.handlePending( this.size, arguments, promise ) )
     {
       return promise;
     }
@@ -1330,10 +1445,10 @@ Stork.prototype =
   {
     throw 'Stork._size is not implemented';
   },
-  
+
   /**
    * The format of success callback for {@link Stork#all}.
-   * 
+   *
    * @callback Stork~allSuccess
    * @param {Array} values
    *        An array of all values stored. This should not be modified.
@@ -1343,7 +1458,7 @@ Stork.prototype =
 
   /**
    * The format of failure callback for {@link Stork#all}.
-   * 
+   *
    * @callback Stork~allFailure
    * @param {Any} error
    *        The error that was thrown.
@@ -1363,7 +1478,7 @@ Stork.prototype =
    * db.all( onSucessFunc, onFailureFunc ); // listen for success/failure
    * db.all().then( onSuccessFunc, onFailureFunc ); // listen to promise
    * ```
-   * 
+   *
    * @param  {Stork~allSuccess} [success]
    *         The function to invoke with all the key-value pairs.
    * @param  {Stork~allFailure} [failure]
@@ -1376,7 +1491,7 @@ Stork.prototype =
   {
     var promise = new Promise( this, success, failure );
 
-    if ( this.handlePending( this.all, arguments, promise ) ) 
+    if ( this.handlePending( this.all, arguments, promise ) )
     {
       return promise;
     }
@@ -1406,7 +1521,6 @@ Stork.prototype =
   }
 
 };
-
 
 
 /**
@@ -2890,7 +3004,7 @@ Stork.adapter('chrome-storage-local', 4, function()
 {
   var store = window.chrome && chrome.storage ? chrome.storage.local : false;
 
-  function isError() 
+  function isError()
   {
     return chrome && chrome.runtime && chrome.runtime.lastError;
   };
@@ -2907,14 +3021,14 @@ Stork.adapter('chrome-storage-local', 4, function()
       return fromJson( rawKey.substring( this.prefix.length ) );
     },
 
-    valid: function() 
+    valid: function()
     {
-      if (!store) 
+      if (!store)
       {
         return false;
       }
 
-      try 
+      try
       {
         var temp = Math.random();
         var map = {};
@@ -2924,17 +3038,17 @@ Stork.adapter('chrome-storage-local', 4, function()
         store.remove( temp );
 
         return true;
-      } 
-      catch (e) 
+      }
+      catch (e)
       {
         return false;
       }
     },
 
-    init: function(options, success, failure) 
+    init: function(options, success, failure)
     {
       var promise = new Promise( this, success, failure );
-      
+
       this.prefix = coalesce( options.prefix, this.name + '-' );
 
       if ( this.lazy )
@@ -3018,11 +3132,11 @@ Stork.adapter('chrome-storage-local', 4, function()
       {
         store.remove( this.cache.keys, function()
         {
-          if ( isError() ) 
+          if ( isError() )
           {
             promise.$failure( [isError()] );
           }
-          else 
+          else
           {
             stork.cache.reset();
 
@@ -3045,6 +3159,49 @@ Stork.adapter('chrome-storage-local', 4, function()
       }
     },
 
+    _resetPromise: function(keys, values, success, failure)
+    {
+      return new Promise( this, success, failure );
+    },
+
+    _reset: function(keys, values, rawKeys, rawValues, promise)
+    {
+      var stork = this;
+
+      var setFailure = function(e)
+      {
+        promise.$failure( [keys, values, e] );
+      };
+      var onDestroyed = function()
+      {
+        var obj = {};
+
+        for (var i = 0; i < values.length; i++)
+        {
+          obj[ rawKeys[ i ] ] = values[ i ];
+        }
+
+        store.set( obj, function()
+        {
+          if ( isError() )
+          {
+            setFailure( isError() );
+          }
+          else
+          {
+            for (var i = 0; i < values.length; i++)
+            {
+              stork.cache.put( rawKeys[ i ], values[ i ], keys[ i ] );
+            }
+
+            promise.$success( [keys, values] );
+          }
+        });
+      };
+
+      this._destroy( new Promise( this, onDestroyed, setFailure ) );
+    },
+
     _put: function(key, value, rawKey, rawValue, promise)
     {
       var stork = this;
@@ -3052,13 +3209,13 @@ Stork.adapter('chrome-storage-local', 4, function()
 
       obj[ rawKey ] = value;
 
-      store.set( obj, function() 
+      store.set( obj, function()
       {
-        if ( isError() ) 
+        if ( isError() )
         {
           promise.$failure( [key, value, isError()] );
-        } 
-        else 
+        }
+        else
         {
           var previousValue = stork.cache.get( rawKey );
 
@@ -3070,7 +3227,7 @@ Stork.adapter('chrome-storage-local', 4, function()
     },
 
     _remove: function(key, rawKey, value, promise)
-    {  
+    {
       var stork = this;
 
       store.remove( rawKey, function()
@@ -3104,6 +3261,7 @@ Stork.adapter('chrome-storage-local', 4, function()
 
   }
 });
+
 
 Stork.adapter('ie-userdata', 1.5, 
 {
@@ -3762,7 +3920,7 @@ Stork.adapter('webkit-sqlite', 6, function()
     {
       index = parseInt( index );
 
-      if ( isNaN( index ) || index < 0 || index >= arr.length ) 
+      if ( isNaN( index ) || index < 0 || index >= arr.length )
       {
         return match;
       }
@@ -3773,12 +3931,12 @@ Stork.adapter('webkit-sqlite', 6, function()
 
   return {
 
-    valid: function() 
+    valid: function()
     {
       return !!window.openDatabase;
     },
 
-    init: function(options, success, failure) 
+    init: function(options, success, failure)
     {
       var promise = new Promise( this, success, failure );
 
@@ -3788,15 +3946,15 @@ Stork.adapter('webkit-sqlite', 6, function()
 
       var stork = this;
 
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [error] );
       };
-      var onTransactionForCreate = function(tx) 
+      var onTransactionForCreate = function(tx)
       {
         tx.executeSql( stork.SQL_CREATE, [], onCreate, onFailure );
       };
-      var onCreate = function(tx, results) 
+      var onCreate = function(tx, results)
       {
         if ( stork.lazy )
         {
@@ -3818,7 +3976,7 @@ Stork.adapter('webkit-sqlite', 6, function()
 
       this.db = openDatabase( databaseName, databaseVersion, databaseName, databaseSize );
       this.db.transaction( onTransactionForCreate, onFailure );
-      
+
       return promise;
     },
 
@@ -3827,20 +3985,20 @@ Stork.adapter('webkit-sqlite', 6, function()
       var promise = new Promise( this, success, failure );
       var stork = this;
 
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [error] );
       };
-      var onTransactionForSelect = function(tx) 
+      var onTransactionForSelect = function(tx)
       {
         tx.executeSql( stork.SQL_SELECT_ALL, [], onResults, onFailure );
       };
-      var onResults = function(tx, results) 
+      var onResults = function(tx, results)
       {
         var cache = new FastMap();
-        try 
+        try
         {
-          for (var i = 0; i < results.rows.length; i++) 
+          for (var i = 0; i < results.rows.length; i++)
           {
             var record = results.rows[ i ];
             var value = fromJson( record.value );
@@ -3852,7 +4010,7 @@ Stork.adapter('webkit-sqlite', 6, function()
           stork.cache.overwrite( cache );
           stork.loaded = true;
         }
-        catch (e) 
+        catch (e)
         {
           promise.$failure( [e] );
         }
@@ -3869,7 +4027,7 @@ Stork.adapter('webkit-sqlite', 6, function()
     {
       var stork = this;
 
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [key, error] );
       };
@@ -3916,17 +4074,17 @@ Stork.adapter('webkit-sqlite', 6, function()
     {
       var stork = this;
 
-      var onTransaction = function(tx) 
+      var onTransaction = function(tx)
       {
         tx.executeSql( stork.SQL_DESTROY, [], onSuccess, onFailure );
       };
-      var onSuccess = function(tx, results) 
+      var onSuccess = function(tx, results)
       {
         stork.cache.reset();
 
         promise.$success();
       };
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [error] );
       };
@@ -3937,12 +4095,12 @@ Stork.adapter('webkit-sqlite', 6, function()
     _put: function(key, value, rawKey, rawValue, promise)
     {
       var stork = this;
-      
-      var onTransaction = function(tx) 
+
+      var onTransaction = function(tx)
       {
         tx.executeSql( stork.SQL_INSERT, [rawKey, rawValue], onSuccess, onFailure );
       };
-      var onSuccess = function(tx, results) 
+      var onSuccess = function(tx, results)
       {
         var previousValue = stork.cache.get( rawKey );
 
@@ -3950,7 +4108,7 @@ Stork.adapter('webkit-sqlite', 6, function()
 
         promise.$success( [key, value, previousValue] );
       };
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [key, value, error] );
       };
@@ -3961,18 +4119,18 @@ Stork.adapter('webkit-sqlite', 6, function()
     _remove: function(key, rawKey, value, promise)
     {
       var stork = this;
-      
-      var onTransaction = function(tx) 
+
+      var onTransaction = function(tx)
       {
         tx.executeSql( stork.SQL_DELETE, [rawKey], onSuccess, onFailure );
       };
-      var onSuccess = function(tx, results) 
+      var onSuccess = function(tx, results)
       {
         stork.cache.remove( rawKey );
 
         promise.$success( [value, key] );
       };
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [key, error] );
       };
@@ -3984,7 +4142,7 @@ Stork.adapter('webkit-sqlite', 6, function()
     {
       var stork = this;
 
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [error] );
       };
@@ -3998,6 +4156,46 @@ Stork.adapter('webkit-sqlite', 6, function()
       };
 
       this.db.readTransaction( onTransaction, onFailure );
+    },
+
+    _resetPromise: function(keys, values, success, failure)
+    {
+      return Promise.Group( values.length + 1, this, success, failure );
+    },
+
+    _reset: function(keys, values, rawKeys, rawValues, promise)
+    {
+      var stork = this;
+
+      var onTransaction = function(tx)
+      {
+        tx.executeSql( stork.SQL_DESTROY, [], onSuccess( -1 ), onFailure );
+
+        for (var i = 0; i < rawValues.length; i++)
+        {
+          tx.executeSql( stork.SQL_INSERT, [rawKeys[ i ], rawValues[ i ]], onSuccess( i ), onFailure );
+        }
+      };
+      var onSuccess = function(i)
+      {
+        return function()
+        {
+          if (i !== -1)
+          {
+            stork.cache.put( rawKeys[ i ], values[ i ], keys[ i ] );
+          }
+
+          promise.$success( [keys, values] );
+        };
+      };
+      var onFailure = function(tx, error)
+      {
+        promise.$failure( [keys, values, error] );
+      };
+
+      stork.cache.reset();
+
+      this.db.transaction( onTransaction, onFailure );
     },
 
     batch: function(records, success, failure)
@@ -4021,7 +4219,7 @@ Stork.adapter('webkit-sqlite', 6, function()
           var value = records[ i ];
           var key = value[ keyName ];
 
-          if ( undef(key) ) 
+          if ( undef(key) )
           {
             key = value[ keyName ] = uuid();
           }
@@ -4030,10 +4228,10 @@ Stork.adapter('webkit-sqlite', 6, function()
           {
             value: value,
             key: key,
-            rawKey: toJson( key ), 
+            rawKey: toJson( key ),
             rawValue: toJson( value )
           });
-        }  
+        }
       }
       catch (e)
       {
@@ -4042,8 +4240,8 @@ Stork.adapter('webkit-sqlite', 6, function()
         return promise;
       }
 
-      var onTransaction = function(tx) 
-      { 
+      var onTransaction = function(tx)
+      {
         for (var i = 0; i < converted.length; i++)
         {
           var record = converted[ i ];
@@ -4051,7 +4249,7 @@ Stork.adapter('webkit-sqlite', 6, function()
           tx.executeSql( stork.SQL_INSERT, [record.rawKey, record.rawValue], onSuccess, onFailure );
         }
       };
-      var onSuccess = function(tx, results) 
+      var onSuccess = function(tx, results)
       {
         if ( ++successful === records.length && promise.$pending() )
         {
@@ -4065,7 +4263,7 @@ Stork.adapter('webkit-sqlite', 6, function()
           promise.$success( [records] );
         }
       };
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [records, successful, error] );
       };
@@ -4086,31 +4284,31 @@ Stork.adapter('webkit-sqlite', 6, function()
 
       var stork = this;
       var rawKeys = [];
-      var values = []; 
+      var values = [];
       var binder = [];
       var query = '';
 
-      var onTransaction = function(tx) 
+      var onTransaction = function(tx)
       {
         tx.executeSql( query, rawKeys, onSuccess, onFailure );
       };
-      var onSuccess = function(tx, results) 
+      var onSuccess = function(tx, results)
       {
-        for (var i = 0; i < rawKeys.length; i++) 
+        for (var i = 0; i < rawKeys.length; i++)
         {
           stork.cache.remove( rawKeys[ i ] );
         }
 
         promise.$success( [values, keys] );
       };
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [values, 0, error] );
       };
 
       try
       {
-        for (var i = 0; i < keys.length; i++) 
+        for (var i = 0; i < keys.length; i++)
         {
           var key = toJson( keys[ i ] );
 
@@ -4153,11 +4351,11 @@ Stork.adapter('webkit-sqlite', 6, function()
       var binder = [];
       var query = '';
 
-      var onTransaction = function(tx) 
+      var onTransaction = function(tx)
       {
         tx.executeSql( query, rawKeys, onSuccess, onFailure );
       };
-      var onSuccess = function(tx, results) 
+      var onSuccess = function(tx, results)
       {
         for (var i = 0; i < results.rows.length; i++)
         {
@@ -4178,14 +4376,14 @@ Stork.adapter('webkit-sqlite', 6, function()
 
         promise.$success( [values, keys] );
       };
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [keys, error] );
       };
 
       try
       {
-        for (var i = 0; i < keys.length; i++) 
+        for (var i = 0; i < keys.length; i++)
         {
           var key = toJson( keys[ i ] );
 
@@ -4201,7 +4399,7 @@ Stork.adapter('webkit-sqlite', 6, function()
           }
         }
 
-        query = streplace( SQL_SELECT_MANY, [this.name, binder.join(',')] );          
+        query = streplace( SQL_SELECT_MANY, [this.name, binder.join(',')] );
       }
       catch (e)
       {
@@ -4225,6 +4423,7 @@ Stork.adapter('webkit-sqlite', 6, function()
 
   }
 });
+
 
 Stork.adapter('window-name', 2, function()
 {

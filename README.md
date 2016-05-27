@@ -1,11 +1,14 @@
 # StorkJS
-### Simple key-value storage in your browser. 
+### Simple key-value storage in your browser.
 
 Easiest way to install is via bower with `bower install storkjs`.
 
 [View Documentation](http://clickermonkey.github.io/storkjs) /
 [Download stork.js](https://raw.githubusercontent.com/ClickerMonkey/storkjs/master/build/stork.js) /
 [Download stork.min.js](https://raw.githubusercontent.com/ClickerMonkey/storkjs/master/build/stork.min.js)
+
+- `stork.js` is `110KB` (`17KB` gzipped)
+- `stork.min.js` is `26KB` (`7KB` gzipped)
 
 StorkJS allows you to store key-value pairs & records in the browser, so when your user returns that data is still there.
 Inspired by [lawnchair](http://brian.io/lawnchair/), StorkJS is a more robust option with error handling, key customization, and much more!
@@ -67,12 +70,12 @@ db.save( {title: 'Hit the Gym'} );
 // Remove one
 db.remove( 4 );
 // Retrieve a record
-db.get( 3, function(todo) 
+db.get( 3, function(todo)
 {
   alert( todo.title );
 });
 // Retrieve all records
-db.all(function(todos) 
+db.all(function(todos)
 {
   // todos = array of all todo records
 });

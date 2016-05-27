@@ -19,7 +19,7 @@ Stork.adapter('webkit-sqlite', 6, function()
     {
       index = parseInt( index );
 
-      if ( isNaN( index ) || index < 0 || index >= arr.length ) 
+      if ( isNaN( index ) || index < 0 || index >= arr.length )
       {
         return match;
       }
@@ -30,12 +30,12 @@ Stork.adapter('webkit-sqlite', 6, function()
 
   return {
 
-    valid: function() 
+    valid: function()
     {
       return !!window.openDatabase;
     },
 
-    init: function(options, success, failure) 
+    init: function(options, success, failure)
     {
       var promise = new Promise( this, success, failure );
 
@@ -45,15 +45,15 @@ Stork.adapter('webkit-sqlite', 6, function()
 
       var stork = this;
 
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [error] );
       };
-      var onTransactionForCreate = function(tx) 
+      var onTransactionForCreate = function(tx)
       {
         tx.executeSql( stork.SQL_CREATE, [], onCreate, onFailure );
       };
-      var onCreate = function(tx, results) 
+      var onCreate = function(tx, results)
       {
         if ( stork.lazy )
         {
@@ -75,7 +75,7 @@ Stork.adapter('webkit-sqlite', 6, function()
 
       this.db = openDatabase( databaseName, databaseVersion, databaseName, databaseSize );
       this.db.transaction( onTransactionForCreate, onFailure );
-      
+
       return promise;
     },
 
@@ -84,20 +84,20 @@ Stork.adapter('webkit-sqlite', 6, function()
       var promise = new Promise( this, success, failure );
       var stork = this;
 
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [error] );
       };
-      var onTransactionForSelect = function(tx) 
+      var onTransactionForSelect = function(tx)
       {
         tx.executeSql( stork.SQL_SELECT_ALL, [], onResults, onFailure );
       };
-      var onResults = function(tx, results) 
+      var onResults = function(tx, results)
       {
         var cache = new FastMap();
-        try 
+        try
         {
-          for (var i = 0; i < results.rows.length; i++) 
+          for (var i = 0; i < results.rows.length; i++)
           {
             var record = results.rows[ i ];
             var value = fromJson( record.value );
@@ -109,7 +109,7 @@ Stork.adapter('webkit-sqlite', 6, function()
           stork.cache.overwrite( cache );
           stork.loaded = true;
         }
-        catch (e) 
+        catch (e)
         {
           promise.$failure( [e] );
         }
@@ -126,7 +126,7 @@ Stork.adapter('webkit-sqlite', 6, function()
     {
       var stork = this;
 
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [key, error] );
       };
@@ -173,17 +173,17 @@ Stork.adapter('webkit-sqlite', 6, function()
     {
       var stork = this;
 
-      var onTransaction = function(tx) 
+      var onTransaction = function(tx)
       {
         tx.executeSql( stork.SQL_DESTROY, [], onSuccess, onFailure );
       };
-      var onSuccess = function(tx, results) 
+      var onSuccess = function(tx, results)
       {
         stork.cache.reset();
 
         promise.$success();
       };
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [error] );
       };
@@ -194,12 +194,12 @@ Stork.adapter('webkit-sqlite', 6, function()
     _put: function(key, value, rawKey, rawValue, promise)
     {
       var stork = this;
-      
-      var onTransaction = function(tx) 
+
+      var onTransaction = function(tx)
       {
         tx.executeSql( stork.SQL_INSERT, [rawKey, rawValue], onSuccess, onFailure );
       };
-      var onSuccess = function(tx, results) 
+      var onSuccess = function(tx, results)
       {
         var previousValue = stork.cache.get( rawKey );
 
@@ -207,7 +207,7 @@ Stork.adapter('webkit-sqlite', 6, function()
 
         promise.$success( [key, value, previousValue] );
       };
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [key, value, error] );
       };
@@ -218,18 +218,18 @@ Stork.adapter('webkit-sqlite', 6, function()
     _remove: function(key, rawKey, value, promise)
     {
       var stork = this;
-      
-      var onTransaction = function(tx) 
+
+      var onTransaction = function(tx)
       {
         tx.executeSql( stork.SQL_DELETE, [rawKey], onSuccess, onFailure );
       };
-      var onSuccess = function(tx, results) 
+      var onSuccess = function(tx, results)
       {
         stork.cache.remove( rawKey );
 
         promise.$success( [value, key] );
       };
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [key, error] );
       };
@@ -241,7 +241,7 @@ Stork.adapter('webkit-sqlite', 6, function()
     {
       var stork = this;
 
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [error] );
       };
@@ -255,6 +255,46 @@ Stork.adapter('webkit-sqlite', 6, function()
       };
 
       this.db.readTransaction( onTransaction, onFailure );
+    },
+
+    _resetPromise: function(keys, values, success, failure)
+    {
+      return Promise.Group( values.length + 1, this, success, failure );
+    },
+
+    _reset: function(keys, values, rawKeys, rawValues, promise)
+    {
+      var stork = this;
+
+      var onTransaction = function(tx)
+      {
+        tx.executeSql( stork.SQL_DESTROY, [], onSuccess( -1 ), onFailure );
+
+        for (var i = 0; i < rawValues.length; i++)
+        {
+          tx.executeSql( stork.SQL_INSERT, [rawKeys[ i ], rawValues[ i ]], onSuccess( i ), onFailure );
+        }
+      };
+      var onSuccess = function(i)
+      {
+        return function()
+        {
+          if (i !== -1)
+          {
+            stork.cache.put( rawKeys[ i ], values[ i ], keys[ i ] );
+          }
+
+          promise.$success( [keys, values] );
+        };
+      };
+      var onFailure = function(tx, error)
+      {
+        promise.$failure( [keys, values, error] );
+      };
+
+      stork.cache.reset();
+
+      this.db.transaction( onTransaction, onFailure );
     },
 
     batch: function(records, success, failure)
@@ -278,7 +318,7 @@ Stork.adapter('webkit-sqlite', 6, function()
           var value = records[ i ];
           var key = value[ keyName ];
 
-          if ( undef(key) ) 
+          if ( undef(key) )
           {
             key = value[ keyName ] = uuid();
           }
@@ -287,10 +327,10 @@ Stork.adapter('webkit-sqlite', 6, function()
           {
             value: value,
             key: key,
-            rawKey: toJson( key ), 
+            rawKey: toJson( key ),
             rawValue: toJson( value )
           });
-        }  
+        }
       }
       catch (e)
       {
@@ -299,8 +339,8 @@ Stork.adapter('webkit-sqlite', 6, function()
         return promise;
       }
 
-      var onTransaction = function(tx) 
-      { 
+      var onTransaction = function(tx)
+      {
         for (var i = 0; i < converted.length; i++)
         {
           var record = converted[ i ];
@@ -308,7 +348,7 @@ Stork.adapter('webkit-sqlite', 6, function()
           tx.executeSql( stork.SQL_INSERT, [record.rawKey, record.rawValue], onSuccess, onFailure );
         }
       };
-      var onSuccess = function(tx, results) 
+      var onSuccess = function(tx, results)
       {
         if ( ++successful === records.length && promise.$pending() )
         {
@@ -322,7 +362,7 @@ Stork.adapter('webkit-sqlite', 6, function()
           promise.$success( [records] );
         }
       };
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [records, successful, error] );
       };
@@ -343,31 +383,31 @@ Stork.adapter('webkit-sqlite', 6, function()
 
       var stork = this;
       var rawKeys = [];
-      var values = []; 
+      var values = [];
       var binder = [];
       var query = '';
 
-      var onTransaction = function(tx) 
+      var onTransaction = function(tx)
       {
         tx.executeSql( query, rawKeys, onSuccess, onFailure );
       };
-      var onSuccess = function(tx, results) 
+      var onSuccess = function(tx, results)
       {
-        for (var i = 0; i < rawKeys.length; i++) 
+        for (var i = 0; i < rawKeys.length; i++)
         {
           stork.cache.remove( rawKeys[ i ] );
         }
 
         promise.$success( [values, keys] );
       };
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [values, 0, error] );
       };
 
       try
       {
-        for (var i = 0; i < keys.length; i++) 
+        for (var i = 0; i < keys.length; i++)
         {
           var key = toJson( keys[ i ] );
 
@@ -410,11 +450,11 @@ Stork.adapter('webkit-sqlite', 6, function()
       var binder = [];
       var query = '';
 
-      var onTransaction = function(tx) 
+      var onTransaction = function(tx)
       {
         tx.executeSql( query, rawKeys, onSuccess, onFailure );
       };
-      var onSuccess = function(tx, results) 
+      var onSuccess = function(tx, results)
       {
         for (var i = 0; i < results.rows.length; i++)
         {
@@ -435,14 +475,14 @@ Stork.adapter('webkit-sqlite', 6, function()
 
         promise.$success( [values, keys] );
       };
-      var onFailure = function(tx, error) 
+      var onFailure = function(tx, error)
       {
         promise.$failure( [keys, error] );
       };
 
       try
       {
-        for (var i = 0; i < keys.length; i++) 
+        for (var i = 0; i < keys.length; i++)
         {
           var key = toJson( keys[ i ] );
 
@@ -458,7 +498,7 @@ Stork.adapter('webkit-sqlite', 6, function()
           }
         }
 
-        query = streplace( SQL_SELECT_MANY, [this.name, binder.join(',')] );          
+        query = streplace( SQL_SELECT_MANY, [this.name, binder.join(',')] );
       }
       catch (e)
       {

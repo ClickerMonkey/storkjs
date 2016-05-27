@@ -23,9 +23,9 @@ function TestBase(adapter, prepend, hasBackend)
   var options1 = {name: prepend + 'test1', adapter: adapter, key:'key'};
   var options2 = {name: prepend + 'test2', adapter: adapter};
 
-  function fail(done) 
+  function fail(done)
   {
-    return function(e) 
+    return function(e)
     {
       console.log( e );
       ok( false, 'fail' );
@@ -33,9 +33,9 @@ function TestBase(adapter, prepend, hasBackend)
     };
   }
 
-  function success(done) 
+  function success(done)
   {
-    return function() 
+    return function()
     {
       ok( true, 'success' );
       done();
@@ -133,26 +133,26 @@ function TestBase(adapter, prepend, hasBackend)
     var done = assert.async();
 
     db.put( KEY, VALUE )
-      .then(function(key, value) 
+      .then(function(key, value)
       {
         strictEqual( key, KEY, 'put key matches' );
         strictEqual( value, VALUE, 'put value matches' );
 
         return this.get( KEY );
       })
-      .then(function(value, key) 
+      .then(function(value, key)
       {
         strictEqual( value, VALUE, 'get value matches' );
 
         return this.remove( KEY );
       })
-      .then(function(removedValue, removedKey) 
+      .then(function(removedValue, removedKey)
       {
         strictEqual( removedValue, VALUE, 'removed value matches' );
 
         return this.get( KEY );
       })
-      .then(function(value, key) 
+      .then(function(value, key)
       {
         strictEqual( value, void 0, 'value removed' );
         done();
@@ -230,7 +230,7 @@ function TestBase(adapter, prepend, hasBackend)
         .then(function(count)
         {
           equal( count, 1, 'has one value loaded!' );
-          
+
           return this.destroy();
         })
         .then( success( done ) )
@@ -368,7 +368,7 @@ function TestBase(adapter, prepend, hasBackend)
       ];
 
       db.batch( records )
-        .then(function() 
+        .then(function()
         {
           return new Stork({name: prepend + 'lazysize', adapter: adapter, lazy: true}).initializing;
         })
@@ -385,7 +385,7 @@ function TestBase(adapter, prepend, hasBackend)
 
           if ( !this.loaded )
           {
-            equal( this.cache.size(), 0, 'cache is empty' ); 
+            equal( this.cache.size(), 0, 'cache is empty' );
           }
 
           return this.destroy();
@@ -452,7 +452,7 @@ function TestBase(adapter, prepend, hasBackend)
 
       db.batch( records )
         // ensure this database has 3 records, and return a new database to work with
-        .then(function(recordsSaved) 
+        .then(function(recordsSaved)
         {
           equal( recordsSaved.length, 3, 'records inserted' );
 
@@ -496,7 +496,7 @@ function TestBase(adapter, prepend, hasBackend)
 
       db.then(function()
         {
-          return this.batch( records ); 
+          return this.batch( records );
         })
         // ensure this database has 3 records, and return a new database to work with
         .then(function(recordsSaved)
@@ -525,6 +525,118 @@ function TestBase(adapter, prepend, hasBackend)
 
     });
   }
+
+  test( 'reset', function(assert)
+  {
+    var db = new Stork({name: prepend + 'reset', adapter: adapter});
+
+    var done = assert.async();
+
+    var keys = [1, 2, 3];
+    var values = [
+      {name: 'Tom'},
+      {name: 'John'},
+      {name: 'Roy'}
+    ];
+
+    expect( 9 );
+
+    db.then(function()
+      {
+        return this.put( 4, {name: 'Paul'} )
+      })
+      .then(function()
+      {
+        return this.size();
+      })
+      .then(function(size)
+      {
+        strictEqual( size, 1 );
+
+        return this.reset( keys, values );
+      })
+      .then(function(keysReturned, valuesReturned)
+      {
+        strictEqual( keys, keysReturned );
+        strictEqual( values, valuesReturned );
+
+        return this.size();
+      })
+      .then(function(size)
+      {
+        strictEqual( size, 3 );
+
+        return this.all();
+      })
+      .then(function(allValues, allKeys)
+      {
+        strictEqual( allValues.length, 3 );
+        deepEqual( allValues[0], values[0] );
+        deepEqual( allValues[1], values[1] );
+        deepEqual( allValues[2], values[2] );
+
+        return this.destroy();
+      })
+      .then( success( done ) )
+      .error( fail( done ) )
+    ;
+  });
+
+  test( 'reset lazy', function(assert)
+  {
+    var db = new Stork({name: prepend + 'reset_lazy', adapter: adapter, lazy: true});
+
+    var done = assert.async();
+
+    var keys = [1, 2, 3];
+    var values = [
+      {name: 'Tom'},
+      {name: 'John'},
+      {name: 'Roy'}
+    ];
+
+    expect( 9 );
+
+    db.then(function()
+      {
+        return this.put( 4, {name: 'Paul'} )
+      })
+      .then(function()
+      {
+        return this.size();
+      })
+      .then(function(size)
+      {
+        strictEqual( size, 1 );
+
+        return this.reset( keys, values );
+      })
+      .then(function(keysReturned, valuesReturned)
+      {
+        strictEqual( keys, keysReturned );
+        strictEqual( values, valuesReturned );
+
+        return this.size();
+      })
+      .then(function(size)
+      {
+        strictEqual( size, 3 );
+
+        return this.all();
+      })
+      .then(function(allValues, allKeys)
+      {
+        strictEqual( allValues.length, 3 );
+        deepEqual( allValues[0], values[0] );
+        deepEqual( allValues[1], values[1] );
+        deepEqual( allValues[2], values[2] );
+
+        return this.destroy();
+      })
+      .then( success( done ) )
+      .error( fail( done ) )
+    ;
+  });
 
 
 }
