@@ -1,8 +1,8 @@
 
-  
-  global.Stork = Stork;
-  global.Stork.getAdapter = getAdapter;
-  global.Stork.Promise = Promise;
-  global.Stork.FastMap = FastMap;
+  Stork.getAdapter = getAdapter;
+  Stork.Promise = Promise;
+  Stork.FastMap = FastMap;
 
-})(window);
+  return Stork;
+
+}));
