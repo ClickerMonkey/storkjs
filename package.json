@@ -1,9 +1,10 @@
 {
   "name": "storkjs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "storkjs - Store your data everywhere",
   "author": "Philip Diffenderfer",
   "license": "proprietary",
+  "main": "build/stork.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/ClickerMonkey/storkjs.git"
